@@ -2,7 +2,7 @@ package com.bjit.salon.reservation.service.controller;
 
 
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
-import com.bjit.salon.reservation.service.dto.request.ReservationStartsDto;
+import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateAction;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<String> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
         log.info("Making reservation by consumer for staff with: {}", reservationCreateDto.toString());
-        reservationService.createReservation(reservationCreateDto);
+        reservationService.makeNewReservation(reservationCreateDto);
         return ResponseEntity.ok("Reservation created success");
     }
 
@@ -41,9 +41,9 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations/starts")
-    public ResponseEntity<String> starts(@RequestBody ReservationStartsDto reservationStartsDto) {
-        log.info("Updating reservation status by staff for id: {}", reservationStartsDto.getStaffId());
-        reservationService.startWorking(reservationStartsDto);
+    public ResponseEntity<String> updateReservationStatus(@RequestBody ReservationStatusUpdateAction reservationStatusUpdateAction) {
+        log.info("Updating reservation status by staff for id: {}", reservationStatusUpdateAction.getStaffId());
+        reservationService.updateStatus(reservationStatusUpdateAction);
         return ResponseEntity.ok("Updated status");
     }
 
