@@ -42,7 +42,7 @@ public class ReservationServiceImpl implements ReservationService {
         LocalTime approximateEndTime = getApproximateEndTime(reservationCreateDto, totalRequiredMinutes);
         // get the respective staff reservations
         List<Reservation> currentReservationByStaff = reservationRepository
-                .findAllByStaffIdAndReservationDate(reservationCreateDto.getStaffId(), reservationCreateDto.getReservationDate());
+                .findAllByStaffIdAndReservationDate(reservationCreateDto.getStaffId(), reservationCreateDto.getReservationDate()); // mock
         if (currentReservationByStaff.size() == 0) {
             // if there are no reservation in this date,
             //  no need to check. create a new reservation on this day
@@ -112,13 +112,12 @@ public class ReservationServiceImpl implements ReservationService {
 
     // method 2 for make a new reservation
     @Override
-    public void makeNewReservation(ReservationCreateDto reservationCreateDto) {
+    public ReservationResponseDto makeNewReservation(ReservationCreateDto reservationCreateDto) {
         int totalRequiredMinutes = getApproximateTotalTimeInMinutes(reservationCreateDto);
         LocalTime approximateEndTime = getApproximateEndTime(reservationCreateDto,totalRequiredMinutes);
-        saveReservation(reservationCreateDto,approximateEndTime);
+        Reservation reservation = saveReservation(reservationCreateDto,approximateEndTime);
+        return reservationMapper.toReservationResponse(reservation);
     }
-
-
     private void checkingReservation(ReservationCreateDto reservationCreateDto, List<Reservation> initiatedReservations, LocalTime approximateEndTime) {
 
         Optional<Reservation> hasPreviousReservations = initiatedReservations
@@ -139,18 +138,16 @@ public class ReservationServiceImpl implements ReservationService {
             throw new ReservationTimeOverlapException("Invalid Time overlapping...");
         }
     }
-
-    private void saveReservation(ReservationCreateDto reservationCreateDto, LocalTime approximateEndTime) {
+    private Reservation saveReservation(ReservationCreateDto reservationCreateDto, LocalTime approximateEndTime) {
         boolean alreadyHasReservation = reservationRepository
-                .existsByStartTimeAndEndTime(reservationCreateDto.getStartTime(), approximateEndTime);
+                .existsByStartTimeAndEndTime(reservationCreateDto.getStartTime(), approximateEndTime); //mock
         if (alreadyHasReservation) {
             throw new StaffAlreadyEngagedException("The reservation has already taken");
         }
         double totalPayableAmount = getTotalPayableAmount(reservationCreateDto);
-        addReservationToDatabase(reservationCreateDto, approximateEndTime, totalPayableAmount);
+        return addReservationToDatabase(reservationCreateDto, approximateEndTime, totalPayableAmount);
     }
-
-    private void addReservationToDatabase(ReservationCreateDto reservationCreateDto, LocalTime approximateEndTime, double totalPayableAmount) {
+    private Reservation addReservationToDatabase(ReservationCreateDto reservationCreateDto, LocalTime approximateEndTime, double totalPayableAmount) {
         Reservation newReservation = Reservation.builder()
                 .staffId(reservationCreateDto.getStaffId())
                 .consumerId(reservationCreateDto.getConsumerId())
@@ -162,41 +159,35 @@ public class ReservationServiceImpl implements ReservationService {
                 .services(reservationMapper.toCatalogs(reservationCreateDto.getServices()))
                 .totalPayableAmount(totalPayableAmount)
                 .build();
-        reservationRepository.save(newReservation);
+        return reservationRepository.save(newReservation); //mock
     }
-
     private double getTotalPayableAmount(ReservationCreateDto reservationCreateDto) {
         return reservationCreateDto.getServices()
                 .stream().filter(service -> service.getPayableAmount() != 0.0)
                 .mapToDouble(CatalogRequest::getPayableAmount).sum();
     }
-
     private Optional<Reservation> getLastCompletedOrProcessingReservation(List<Reservation> currentReservationByStaff) {
         return currentReservationByStaff
                 .stream().filter(item -> item.getWorkingStatus().equals(EWorkingStatus.COMPLETED)
                         || item.getWorkingStatus().equals(EWorkingStatus.PROCESSING))
                 .reduce((first, second) -> second);
     }
-
     private LocalTime getApproximateEndTime(ReservationCreateDto reservationCreateDto, int totalRequiredMinutes) {
         LocalTime endTime = minutesToLocalTime(totalRequiredMinutes);
         return reservationCreateDto
                 .getStartTime().plusHours(endTime.getHour())
                 .plusMinutes(endTime.getMinute());
     }
-
     private int getApproximateTotalTimeInMinutes(ReservationCreateDto reservationCreateDto) {
         return reservationCreateDto.getServices()
                 .stream().filter(service -> service.getApproximateTimeForCompletion() != 0)
                 .mapToInt(CatalogRequest::getApproximateTimeForCompletion).sum();
     }
-
     private List<Reservation> getInitiatedReservations(List<Reservation> currentReservationByStaff) {
         return currentReservationByStaff
                 .stream().filter(reservation -> reservation.getWorkingStatus().equals(EWorkingStatus.INITIATED))
                 .collect(Collectors.toList());
 
     }
-
 
 }

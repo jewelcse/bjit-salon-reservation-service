@@ -8,6 +8,7 @@ import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +27,10 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping("/reservations")
-    public ResponseEntity<String> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
+    public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
         log.info("Making reservation by consumer for staff with: {}", reservationCreateDto.toString());
-        reservationService.makeNewReservation(reservationCreateDto);
-        return ResponseEntity.ok("Reservation created success");
+
+        return new ResponseEntity<>(reservationService.makeNewReservation(reservationCreateDto), HttpStatus.CREATED);
     }
 
 

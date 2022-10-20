@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
+@Builder
 public class ReservationResponseDto {
 
     private Long id;

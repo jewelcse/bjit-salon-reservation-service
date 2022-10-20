@@ -9,6 +9,7 @@ import javax.persistence.Column;
 @Setter
 @Getter
 @ToString
+@Builder
 public class CatalogRequest {
 
     private String name;
