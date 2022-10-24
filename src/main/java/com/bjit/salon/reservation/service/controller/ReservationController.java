@@ -29,7 +29,6 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
         log.info("Making reservation by consumer for staff with: {}", reservationCreateDto.toString());
-
         return new ResponseEntity<>(reservationService.makeNewReservation(reservationCreateDto), HttpStatus.CREATED);
     }
 

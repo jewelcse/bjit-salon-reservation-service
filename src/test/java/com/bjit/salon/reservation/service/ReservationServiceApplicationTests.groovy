@@ -1,12 +1,14 @@
 package com.bjit.salon.reservation.service
 
+import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto
-import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto
+import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateAction
 import com.bjit.salon.reservation.service.entity.Catalog
 import com.bjit.salon.reservation.service.entity.EPaymentMethod
 import com.bjit.salon.reservation.service.entity.EWorkingStatus
 import com.bjit.salon.reservation.service.entity.Reservation
+import com.bjit.salon.reservation.service.exception.ReservationNotFoundException
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException
 import com.bjit.salon.reservation.service.mapper.ReservationMapper
 import com.bjit.salon.reservation.service.producer.ReservationProducer
@@ -104,7 +106,7 @@ class ReservationServiceApplicationTests extends Specification {
         response.getTotalPayableAmount() == (double) 100.00
     }
 
-    def "should throw the reservation has already taken exception"(){
+    def "should throw the reservation has already taken exception"() {
 
         given:
         LocalTime startTime = LocalTime.parse("10:00:00")
@@ -131,7 +133,7 @@ class ReservationServiceApplicationTests extends Specification {
                 .services(requestedServices)
                 .build()
 
-        reservationRepository.existsByStartTimeAndEndTime(startTime, endTime) >> true
+        reservationRepository.existsByReservationDateAndStartTimeAndEndTime(_,_, _) >> true
 
         when:
         reservationService.makeNewReservation(reservationRequest)
@@ -142,7 +144,118 @@ class ReservationServiceApplicationTests extends Specification {
 
     }
 
+    def "should return all reservation by staff id"() {
 
+        given:
+
+        def reservation = Reservation.builder()
+                .build()
+
+        def reservationResponse = [reservation, reservation, reservation]
+        reservationRepository.findAllByStaffId(1L) >> reservationResponse
+
+        when:
+
+        def size = reservationRepository.findAllByStaffId(1L).size()
+
+        then:
+
+        size == 3
+
+    }
+
+    def "should return null reservation by staff id"() {
+        given:
+        reservationRepository.findAllByStaffId(1L) >> []
+
+        when:
+        def size = reservationRepository.findAllByStaffId(1L).size()
+
+        then:
+
+        size == 0
+    }
+
+    def "should update the working status by staff"() {
+
+        given:
+        def updateRequest = ReservationStatusUpdateAction.builder()
+                .id(1L)
+                .staffId(1L)
+                .status(EWorkingStatus.ALLOCATED)
+                .build()
+
+        def updateResponse = StaffActivityCreateAndUpdateDto.builder()
+                .staffId(1L)
+                .reservationId(1L)
+                .workingDate(null)
+                .workingStatus(EWorkingStatus.ALLOCATED)
+                .startTime(null)
+                .endTime(null)
+                .consumerId(1L)
+                .build()
+
+        def reservation = Reservation
+                .builder()
+                .id(1L)
+                .startTime(null)
+                .endTime(null)
+                .services(null)
+                .consumerId(1L)
+                .workingStatus(EWorkingStatus.INITIATED)
+                .paymentMethod(EPaymentMethod.CARD)
+                .staffId(1L)
+                .reservationDate(null)
+                .totalPayableAmount(100.00)
+                .build()
+
+        reservationRepository.findById(1L) >> Optional.of(reservation)
+        reservationRepository.save(_) >> reservation
+        reservationProducer.createNewActivityAndUpdateActivityStatus(_) >> updateResponse
+
+        when:
+        def response = reservationService.updateStatus(updateRequest)
+
+        then:
+        response.getStaffId() == 1
+        response.getConsumerId() == 1
+        response.getWorkingStatus() == EWorkingStatus.ALLOCATED
+
+    }
+
+    def "should throw reservation not found exception while updating the activity status"(){
+
+        given:
+        def updateRequest = ReservationStatusUpdateAction.builder()
+                .id(2L)
+                .staffId(1L)
+                .status(EWorkingStatus.ALLOCATED)
+                .build()
+
+        def reservation = Reservation
+                .builder()
+                .id(2L)
+                .startTime(null)
+                .endTime(null)
+                .services(null)
+                .consumerId(1L)
+                .workingStatus(EWorkingStatus.INITIATED)
+                .paymentMethod(EPaymentMethod.CARD)
+                .staffId(1L)
+                .reservationDate(null)
+                .totalPayableAmount(100.00)
+                .build()
+
+        reservationRepository.findById(2L) >> {throw new ReservationNotFoundException("The reservation not found for id: 2")}
+
+        when:
+        reservationService.updateStatus(updateRequest)
+
+        then:
+        def exception = thrown(ReservationNotFoundException)
+        exception.message == "The reservation not found for id: 2"
+
+    }
 
 
 }

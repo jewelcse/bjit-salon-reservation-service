@@ -22,6 +22,10 @@ public class ReservationCreateDto {
     private long consumerId; // user id
     private LocalDate reservationDate;
     private LocalTime startTime;
+
+    private LocalTime endTime;// will be calculated dynamically
+
+    private double totalPayableAmount; // will be calculated dynamically
     private EPaymentMethod paymentMethod; // payment method
     private List<CatalogRequest> services;
 }
