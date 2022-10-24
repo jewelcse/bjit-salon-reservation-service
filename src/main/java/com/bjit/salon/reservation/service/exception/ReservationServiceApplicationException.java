@@ -41,6 +41,12 @@ public class ReservationServiceApplicationException {
                 .body(new ExceptionResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(value = ReservationTerminatedOrCanceledException.class)
+    public ResponseEntity<ExceptionResponse> reservationTerminatedOrCanceledException(ReservationTerminatedOrCanceledException ex){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(value = ReservationTimeOverlapException.class)
     public ResponseEntity<ExceptionResponse> reservationTimeOverlapException(ReservationTimeOverlapException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
