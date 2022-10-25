@@ -1,4 +1,4 @@
-package com.bjit.salon.reservation.service
+package com.bjit.salon.reservation.service.serviceImpl
 
 import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest
@@ -24,7 +24,7 @@ import java.time.LocalTime
 
 
 @SpringBootTest
-class ReservationServiceApplicationTest extends Specification {
+class ReservationServiceApplicationUnitTest extends Specification {
 
     private ReservationServiceImpl reservationService;
     private ReservationRepository reservationRepository;
@@ -56,7 +56,7 @@ class ReservationServiceApplicationTest extends Specification {
         reservationRepository.findAllByStaffId(1L) >> reservationResponse
 
         when:
-        def size = reservationRepository.findAllByStaffId(1L).size()
+        def size = reservationService.getAllReservationByStaff(1L).size()
 
         then:
         size == 3
@@ -68,7 +68,7 @@ class ReservationServiceApplicationTest extends Specification {
         reservationRepository.findAllByStaffId(1L) >> []
 
         when:
-        def size = reservationRepository.findAllByStaffId(1L).size()
+        def size = reservationService.getAllReservationByStaff(1L).size()
 
         then:
 

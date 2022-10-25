@@ -14,7 +14,7 @@ import spock.lang.Specification
 import static com.bjit.salon.reservation.service.util.ConstraintsUtil.STAFF_NEW_ACTIVITY_TOPIC
 
 @SpringBootTest
-class ReservationProducerTest extends Specification {
+class ReservationProducerUnitTest extends Specification {
 
     private KafkaTemplate<String, StaffActivityCreateAndUpdateDto> kafkaTemplate;
     private ReservationProducer producer;

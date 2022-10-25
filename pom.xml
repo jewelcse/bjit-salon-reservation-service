@@ -17,7 +17,6 @@
         <java.version>11</java.version>
         <spring-cloud.version>2020.0.0</spring-cloud.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
-        <surefireArgLine>-Xms256m -Xmx1524m -XX:MaxPermSize=256m -Duser.language=en</surefireArgLine>
     </properties>
     <dependencies>
         <dependency>
@@ -111,6 +110,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -139,6 +146,7 @@
                         <exclude>**/dto/request/*.class</exclude>
                         <exclude>**/dto/response/*.class</exclude>
                         <exclude>**/dto/producer/*.class</exclude>
+                        <exclude>**/mapper/*.class</exclude>
                         <exclude>**/entity/*.class</exclude>
                         <exclude>**/exception/*.class</exclude>
                     </excludes>
