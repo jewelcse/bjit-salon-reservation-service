@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Getter
 @ToString
 @Builder
-public class StaffActivityCreateDto implements Serializable {
+public class StaffActivityCreateAndUpdateDto implements Serializable {
     private static final long serialVersionUID = 9178661439383356177L;
     private Long staffId;
     private Long consumerId;

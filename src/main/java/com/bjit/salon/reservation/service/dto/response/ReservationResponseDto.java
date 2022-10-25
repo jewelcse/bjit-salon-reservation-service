@@ -1,13 +1,9 @@
 package com.bjit.salon.reservation.service.dto.response;
 
-import com.bjit.salon.reservation.service.entity.Catalog;
 import com.bjit.salon.reservation.service.entity.EPaymentMethod;
 import com.bjit.salon.reservation.service.entity.EWorkingStatus;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -17,6 +13,7 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
+@Builder
 public class ReservationResponseDto {
 
     private Long id;

@@ -8,8 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 @Setter
 @Getter
+@Builder
 @ToString
-public class ReservationStartsDto {
+public class ReservationStatusUpdateAction {
 
     private long id; // reservation id
     private long staffId; // staff id

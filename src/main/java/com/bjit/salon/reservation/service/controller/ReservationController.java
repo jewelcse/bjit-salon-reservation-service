@@ -2,12 +2,13 @@ package com.bjit.salon.reservation.service.controller;
 
 
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
-import com.bjit.salon.reservation.service.dto.request.ReservationStartsDto;
+import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateAction;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +27,9 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping("/reservations")
-    public ResponseEntity<String> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
+    public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
         log.info("Making reservation by consumer for staff with: {}", reservationCreateDto.toString());
-        reservationService.createReservation(reservationCreateDto);
-        return ResponseEntity.ok("Reservation created success");
+        return new ResponseEntity<>(reservationService.makeNewReservation(reservationCreateDto), HttpStatus.CREATED);
     }
 
 
@@ -41,9 +41,9 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations/starts")
-    public ResponseEntity<String> starts(@RequestBody ReservationStartsDto reservationStartsDto) {
-        log.info("Updating reservation status by staff for id: {}", reservationStartsDto.getStaffId());
-        reservationService.startWorking(reservationStartsDto);
+    public ResponseEntity<String> updateReservationStatus(@RequestBody ReservationStatusUpdateAction reservationStatusUpdateAction) {
+        log.info("Updating reservation status by staff for id: {}", reservationStatusUpdateAction.getStaffId());
+        reservationService.updateStatus(reservationStatusUpdateAction);
         return ResponseEntity.ok("Updated status");
     }
 
