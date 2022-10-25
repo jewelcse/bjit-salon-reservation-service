@@ -147,6 +147,7 @@
                         <exclude>**/dto/response/*.class</exclude>
                         <exclude>**/dto/producer/*.class</exclude>
                         <exclude>**/mapper/*.class</exclude>
+                        <exclude>**/util/*.class</exclude>
                         <exclude>**/entity/*.class</exclude>
                         <exclude>**/exception/*.class</exclude>
                     </excludes>
