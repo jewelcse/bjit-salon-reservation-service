@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -46,85 +47,72 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public StaffActivityCreateAndUpdateDto updateStatus(ReservationStatusUpdateAction reservationStatusUpdateAction) {
-        Optional<Reservation> currentReservation = reservationRepository.findById(reservationStatusUpdateAction.getId());
-        if (currentReservation.isEmpty()) {
-            throw new ReservationNotFoundException("The reservation not found for id: " + reservationStatusUpdateAction.getId());
-        }
+        Reservation currentReservation = getReservationByReservationId(reservationStatusUpdateAction.getId());
         // check for reservation cancellation
         if (reservationStatusUpdateAction.getStatus() == EWorkingStatus.CANCELLED) {
-            if (currentReservation.get().getWorkingStatus() == EWorkingStatus.ALLOCATED ||
-                    currentReservation.get().getWorkingStatus() == EWorkingStatus.PROCESSING ||
-                    currentReservation.get().getWorkingStatus() == EWorkingStatus.COMPLETED) {
+            if (currentReservation.getWorkingStatus() == EWorkingStatus.ALLOCATED ||
+                    currentReservation.getWorkingStatus() == EWorkingStatus.PROCESSING ||
+                    currentReservation.getWorkingStatus() == EWorkingStatus.COMPLETED) {
                 throw new ReservationTerminatedOrCanceledException("Yor can't cancel the reservation!");
             } else {
-                if (currentReservation.get().getWorkingStatus() == EWorkingStatus.CANCELLED) {
+                if (currentReservation.getWorkingStatus() == EWorkingStatus.CANCELLED) {
                     throw new ReservationTerminatedOrCanceledException("Already you canceled reservation!");
                 }
                 // only initiated reservation can be canceled
                 // no-need to notify the staff-service, bcz no need to create a new activity
                 // since already canceled by staff
-                if (currentReservation.get().getWorkingStatus() == EWorkingStatus.INITIATED) {
-                    currentReservation.get().setWorkingStatus(EWorkingStatus.CANCELLED);
-                    reservationRepository.save(currentReservation.get());
+                if (currentReservation.getWorkingStatus() == EWorkingStatus.INITIATED) {
+                    currentReservation.setWorkingStatus(EWorkingStatus.CANCELLED);
+                    reservationRepository.save(currentReservation);
                     throw new ReservationTerminatedOrCanceledException("The reservation is canceled by staff!");
                 }
             }
         }
 
-        if (currentReservation.get().getWorkingStatus() == EWorkingStatus.CANCELLED) {
+        if (currentReservation.getWorkingStatus() == EWorkingStatus.CANCELLED) {
             throw new ReservationTerminatedOrCanceledException("Canceled reservation can't be re-initiated/allocated/processing/completed!");
         }
 
         if (reservationStatusUpdateAction.getStatus() == EWorkingStatus.ALLOCATED) {
-            if (currentReservation.get().getWorkingStatus() == EWorkingStatus.PROCESSING
-                    || currentReservation.get().getWorkingStatus() == EWorkingStatus.COMPLETED) {
+            if (currentReservation.getWorkingStatus() == EWorkingStatus.PROCESSING
+                    || currentReservation.getWorkingStatus() == EWorkingStatus.COMPLETED) {
                 throw new ReservationTerminatedOrCanceledException("You can't be re-allocate the reservation!");
-            } else if (currentReservation.get().getWorkingStatus() == EWorkingStatus.ALLOCATED) {
+            } else if (currentReservation.getWorkingStatus() == EWorkingStatus.ALLOCATED) {
                 throw new ReservationTerminatedOrCanceledException("The reservation is already in ALLOCATED stage!");
             } else {
-                if (currentReservation.get().getWorkingStatus() == EWorkingStatus.INITIATED) {
-                    currentReservation.get().setWorkingStatus(EWorkingStatus.ALLOCATED);
-                    reservationRepository.save(currentReservation.get());
+                if (currentReservation.getWorkingStatus() == EWorkingStatus.INITIATED) {
+                    currentReservation.setWorkingStatus(EWorkingStatus.ALLOCATED);
+                    reservationRepository.save(currentReservation);
                 }
             }
         } else if (reservationStatusUpdateAction.getStatus() == EWorkingStatus.PROCESSING) {
-            if (currentReservation.get().getWorkingStatus() == EWorkingStatus.COMPLETED) {
+            if (currentReservation.getWorkingStatus() == EWorkingStatus.COMPLETED) {
                 throw new ReservationTerminatedOrCanceledException("You can't be re-processing the reservation!");
-            } else if (currentReservation.get().getWorkingStatus() == EWorkingStatus.PROCESSING) {
+            } else if (currentReservation.getWorkingStatus() == EWorkingStatus.PROCESSING) {
                 throw new ReservationTerminatedOrCanceledException("The reservation is already in PROCESSING stage!");
             } else {
-                if (currentReservation.get().getWorkingStatus() == EWorkingStatus.ALLOCATED){
-                    currentReservation.get().setWorkingStatus(EWorkingStatus.PROCESSING);
-                    reservationRepository.save(currentReservation.get());
-                }else{
+                if (currentReservation.getWorkingStatus() == EWorkingStatus.ALLOCATED) {
+                    currentReservation.setWorkingStatus(EWorkingStatus.PROCESSING);
+                    reservationRepository.save(currentReservation);
+                } else {
                     throw new ReservationTerminatedOrCanceledException("You can't be process a reservation without allocated it before");
                 }
             }
         } else if (reservationStatusUpdateAction.getStatus() == EWorkingStatus.COMPLETED) {
-            if (currentReservation.get().getWorkingStatus() == EWorkingStatus.COMPLETED){
+            if (currentReservation.getWorkingStatus() == EWorkingStatus.COMPLETED) {
                 throw new ReservationTerminatedOrCanceledException("The reservation is already in COMPLETED stage!");
             }
-            if (currentReservation.get().getWorkingStatus() == EWorkingStatus.PROCESSING){
-                currentReservation.get().setWorkingStatus(EWorkingStatus.COMPLETED);
-                reservationRepository.save(currentReservation.get());
-            }else{
+            if (currentReservation.getWorkingStatus() == EWorkingStatus.PROCESSING) {
+                currentReservation.setWorkingStatus(EWorkingStatus.COMPLETED);
+                reservationRepository.save(currentReservation);
+            } else {
                 throw new ReservationTerminatedOrCanceledException("You can't be complete a reservation without processed it before");
             }
         } else {
             throw new ReservationTerminatedOrCanceledException("You can't re-initiated the reservation again!");
         }
-
         // notify the staff-service for creating a new activity/ update the status
-        StaffActivityCreateAndUpdateDto newActivityAndUpdateStatus = StaffActivityCreateAndUpdateDto
-                .builder()
-                .staffId(currentReservation.get().getStaffId())
-                .consumerId(currentReservation.get().getConsumerId())
-                .reservationId(currentReservation.get().getId())
-                .startTime(currentReservation.get().getStartTime())
-                .endTime(currentReservation.get().getEndTime())
-                .workingDate(currentReservation.get().getReservationDate())
-                .workingStatus(currentReservation.get().getWorkingStatus())
-                .build();
+        StaffActivityCreateAndUpdateDto newActivityAndUpdateStatus = createOrUpdateActivity(currentReservation);
         return reservationProducer.createNewActivityAndUpdateActivityStatus(newActivityAndUpdateStatus);
 
     }
@@ -139,11 +127,10 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private Reservation saveReservation(ReservationCreateDto reservationCreateDto) {
-        boolean alreadyHasReservation = reservationRepository
-                .existsByReservationDateAndStartTimeAndEndTime(
-                        reservationCreateDto.getReservationDate(),
-                        reservationCreateDto.getStartTime(),
-                        reservationCreateDto.getEndTime());
+        boolean alreadyHasReservation = getReservationByDateAndStartTimeAndEndTime(reservationCreateDto.getReservationDate(),
+                reservationCreateDto.getStartTime(),
+                reservationCreateDto.getEndTime()
+        );
         if (alreadyHasReservation) {
             throw new StaffAlreadyEngagedException("The reservation has already taken");
         }
@@ -182,6 +169,32 @@ public class ReservationServiceImpl implements ReservationService {
     private int getApproximateTotalTimeInMinutes(List<CatalogRequest> services) {
         return services.stream().filter(service -> service.getApproximateTimeForCompletion() != 0)
                 .mapToInt(CatalogRequest::getApproximateTimeForCompletion).sum();
+    }
+
+    private Reservation getReservationByReservationId(Long id) {
+        Optional<Reservation> reservation = reservationRepository.findById(id);
+        if (reservation.isEmpty()) {
+            throw new ReservationNotFoundException("The reservation not found for id: " + id);
+        }
+        return reservation.get();
+    }
+
+    private boolean getReservationByDateAndStartTimeAndEndTime(LocalDate reservationDate, LocalTime startTime, LocalTime endTime) {
+        return reservationRepository
+                .existsByReservationDateAndStartTimeAndEndTime(reservationDate, startTime, endTime);
+    }
+
+    private StaffActivityCreateAndUpdateDto createOrUpdateActivity(Reservation reservation){
+        return StaffActivityCreateAndUpdateDto
+                .builder()
+                .staffId(reservation.getStaffId())
+                .consumerId(reservation.getConsumerId())
+                .reservationId(reservation.getId())
+                .startTime(reservation.getStartTime())
+                .endTime(reservation.getEndTime())
+                .workingDate(reservation.getReservationDate())
+                .workingStatus(reservation.getWorkingStatus())
+                .build();
     }
 
 }

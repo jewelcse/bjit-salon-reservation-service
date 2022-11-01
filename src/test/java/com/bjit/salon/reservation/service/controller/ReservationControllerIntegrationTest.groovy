@@ -1,14 +1,16 @@
 package com.bjit.salon.reservation.service.controller
 
+
+import com.bjit.salon.reservation.service.util.MethodsUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MvcResult
 import spock.lang.Specification
 
-import static org.mockito.ArgumentMatchers.anyInt
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
@@ -29,8 +31,8 @@ class ReservationControllerIntegrationTest extends Specification {
         String content = "{\n" +
                 "    \"staffId\":3,\n" +
                 "    \"consumerId\":11,\n" +
-                "    \"reservationDate\":\"2025-12-20\",\n" +
-                "    \"startTime\":\"14:30:00\",\n" +
+                "    \"reservationDate\":\"2022-12-20\",\n" +
+                "    \"startTime\":\"16:30:00\",\n" +
                 "    \"paymentMethod\":\"CARD\",\n" +
                 "    \"services\":[\n" +
                 "        {\n" +
@@ -42,22 +44,25 @@ class ReservationControllerIntegrationTest extends Specification {
                 "    ]\n" +
                 "}"
 
+        def expectedResponse = MethodsUtil.loadFileFromClassPath("json/reservationCreateResponse.json")
 
-        expect:
-        mockMvc.perform(post("/api/v1/reservations")
+        when:
+        MvcResult result = mockMvc.perform(post("/api/v1/reservations")
                 .content(content).contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().is2xxSuccessful());
+                .andDo(print()).andExpect(status().is2xxSuccessful()).andReturn()
+
+        then:
+        def response = result.getResponse().getContentAsString()
+        response == expectedResponse
 
     }
 
     def "should return all the reservations by staff id"(){
         expect:
-        mockMvc.perform(get("/api/v1/reservations/staff/3"))
+        MvcResult result = mockMvc.perform(get("/api/v1/reservations/staff/3"))
                 .andExpect(status().isOk())
-                .andDo(print());
-
+                .andDo(print()).andReturn()
     }
-
 
     def "should update the reservation status"(){
 
