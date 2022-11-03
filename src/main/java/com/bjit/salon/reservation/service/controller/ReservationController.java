@@ -17,6 +17,7 @@ import java.util.List;
 import static com.bjit.salon.reservation.service.util.ConstraintsUtil.RESERVATION_SERVICE_APPLICATION_BASE_API;
 
 
+// todo: remove this comment, added only for PR.
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(RESERVATION_SERVICE_APPLICATION_BASE_API)
