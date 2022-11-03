@@ -14,6 +14,7 @@ public class CatalogRequest {
 
     private String name;
     private String description;
+    // todo: (PR-Review) approximateCompletionTime
     private int approximateTimeForCompletion;
     private double payableAmount;
 }

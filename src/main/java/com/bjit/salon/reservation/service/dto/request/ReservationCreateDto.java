@@ -17,7 +17,9 @@ import java.util.List;
 @Getter
 @ToString
 public class ReservationCreateDto {
-
+    // todo: (PR-Review) Remove unnecessary comments
+    // todo: (PR-Review) Use Instant instead of LocalData
+    // todo: (PR-Review) Add validation for important properties
     private long staffId;   // staff id
     private long consumerId; // user id
     private LocalDate reservationDate;
@@ -26,6 +28,8 @@ public class ReservationCreateDto {
     private LocalTime endTime;// will be calculated dynamically
 
     private double totalPayableAmount; // will be calculated dynamically
+
+    // todo: (PR-Review) Remove E from this ENUM name
     private EPaymentMethod paymentMethod; // payment method
     private List<CatalogRequest> services;
 }

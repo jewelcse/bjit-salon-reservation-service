@@ -16,10 +16,10 @@ import java.util.List;
 
 import static com.bjit.salon.reservation.service.util.ConstraintsUtil.RESERVATION_SERVICE_APPLICATION_BASE_API;
 
-
-// todo: remove this comment, added only for PR.
+// todo: (PR-Review) Follow a specific naming convention like: /reservation-service/api/v1/reservations
 @RequiredArgsConstructor
 @RestController
+// todo: (PR-Review) Add String directly by adding: api/v1
 @RequestMapping(RESERVATION_SERVICE_APPLICATION_BASE_API)
 public class ReservationController {
 
@@ -29,14 +29,18 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
+        // todo: (PR-Review) reservation only needed for staff, consumer and reservation date
         log.info("Making reservation by consumer for staff with: {}", reservationCreateDto.toString());
         return new ResponseEntity<>(reservationService.makeNewReservation(reservationCreateDto), HttpStatus.CREATED);
     }
 
-
+    // todo: (PR-Review) fix the api name and change method name: getAssignedReservations
     @GetMapping("/reservations/staff/{id}")
     public ResponseEntity<List<ReservationResponseDto>> getStaffReservations(@PathVariable("id") long id){
+        // todo: (PR-Review) fix the method name: getAllReservationByStaff
+        // todo: (PR-Review) change the variable name to reservations
         List<ReservationResponseDto> allReservationByStaff = reservationService.getAllReservationByStaff(id);
+        // todo: (PR-Review) Change the message to : Fetched {} reservation by staffId {}
         log.info("Getting all reservations by staff with size: {}", allReservationByStaff.size());
         return ResponseEntity.ok(allReservationByStaff);
     }

@@ -40,6 +40,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationResponseDto> getAllReservationByStaff(long id) {
+        // todo: (PR-Review) Remove extra variables
         List<Reservation> allByStaffId = reservationRepository.findAllByStaffId(id);
         return reservationMapper.reservationsToReservationResponses(allByStaffId);
     }
@@ -129,28 +130,45 @@ public class ReservationServiceImpl implements ReservationService {
 
     }
 
+    // todo: (PR-Review) Refactor this method
+    // todo: (PR-Review) Be consistent: either use make or add or create not all of these.
     @Override
     public ReservationResponseDto makeNewReservation(ReservationCreateDto reservationCreateDto) {
+        // todo: (PR-Review) totalApproximatedTime
         int totalRequiredMinutes = getApproximateTotalTimeInMinutes(reservationCreateDto.getServices());
         LocalTime approximateEndTime = getApproximateEndTime(reservationCreateDto.getStartTime(), totalRequiredMinutes);
         reservationCreateDto.setEndTime(approximateEndTime);
+        // todo: (PR-Review) do not use extra variables
         Reservation reservation = saveReservation(reservationCreateDto);
         return reservationMapper.toReservationResponse(reservation);
     }
 
+    // todo: (PR-Review) Refactor this method
     private Reservation saveReservation(ReservationCreateDto reservationCreateDto) {
-        boolean alreadyHasReservation = reservationRepository
-                .existsByReservationDateAndStartTimeAndEndTime(
-                        reservationCreateDto.getReservationDate(),
-                        reservationCreateDto.getStartTime(),
-                        reservationCreateDto.getEndTime());
-        if (alreadyHasReservation) {
+        // todo: (PR-Review) variable name could be: isReserved, take it in seperate method
+        if (isReserved(reservationCreateDto)) {
+            // todo: (PR-Review) Change the message
             throw new StaffAlreadyEngagedException("The reservation has already taken");
         }
-        double totalPayableAmount = getTotalPayableAmount(reservationCreateDto.getServices());
-        reservationCreateDto.setTotalPayableAmount(totalPayableAmount);
-        return addReservationToDatabase(reservationCreateDto);
+        // todo: (PR-Review) Remove extra variable
+//        double totalPayableAmount = getTotalPayableAmount(reservationCreateDto.getServices());
+
+         return Reservation.builder()
+                .staffId(reservationCreateDto.getStaffId())
+                .consumerId(reservationCreateDto.getConsumerId())
+                .reservationDate(reservationCreateDto.getReservationDate())
+                .startTime(reservationCreateDto.getStartTime())
+                .endTime(reservationCreateDto.getEndTime())
+                .workingStatus(EWorkingStatus.INITIATED)
+                .paymentMethod(reservationCreateDto.getPaymentMethod())
+                .services(reservationMapper.toCatalogs(reservationCreateDto.getServices()))
+                .totalPayableAmount(getTotalPayableAmount(reservationCreateDto.getServices()))
+                .build();
+//        reservationCreateDto.setTotalPayableAmount(totalPayableAmount);
+//        return addReservationToDatabase(reservationCreateDto);
     }
+
+
 
     private Reservation addReservationToDatabase(ReservationCreateDto reservationCreateDto) {
         Reservation newReservation = Reservation.builder()
@@ -166,6 +184,14 @@ public class ReservationServiceImpl implements ReservationService {
                 .build();
         log.info("Reservation completed with details: {}", newReservation.toString());
         return reservationRepository.save(newReservation); //mock
+    }
+
+    private boolean isReserved(ReservationCreateDto reservationCreateDto) {
+        return reservationRepository
+                .existsByReservationDateAndStartTimeAndEndTime(
+                        reservationCreateDto.getReservationDate(),
+                        reservationCreateDto.getStartTime(),
+                        reservationCreateDto.getEndTime());
     }
 
     private double getTotalPayableAmount(List<CatalogRequest> services) {
