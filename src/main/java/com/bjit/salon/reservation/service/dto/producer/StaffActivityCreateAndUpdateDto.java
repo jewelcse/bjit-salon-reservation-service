@@ -1,9 +1,10 @@
 package com.bjit.salon.reservation.service.dto.producer;
 
-import com.bjit.salon.reservation.service.entity.EWorkingStatus;
+import com.bjit.salon.reservation.service.entity.WorkingStatus;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -18,8 +19,7 @@ public class StaffActivityCreateAndUpdateDto implements Serializable {
     private Long staffId;
     private Long consumerId;
     private Long reservationId;
-    private LocalDate workingDate;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private EWorkingStatus workingStatus;
+    private Instant reservationStartAt;
+    private Instant reservationEndAt;
+    private WorkingStatus workingStatus;
 }

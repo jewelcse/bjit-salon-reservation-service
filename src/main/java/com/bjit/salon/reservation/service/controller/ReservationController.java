@@ -12,40 +12,34 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
-import static com.bjit.salon.reservation.service.util.ConstraintsUtil.RESERVATION_SERVICE_APPLICATION_BASE_API;
-
-// todo: (PR-Review) Follow a specific naming convention like: /reservation-service/api/v1/reservations
 @RequiredArgsConstructor
 @RestController
-// todo: (PR-Review) Add String directly by adding: api/v1
-@RequestMapping(RESERVATION_SERVICE_APPLICATION_BASE_API)
+@RequestMapping("reservation-service/api/v1/reservations")
 public class ReservationController {
 
     private static final Logger log = LoggerFactory.getLogger(ReservationController.class);
 
     private final ReservationService reservationService;
 
-    @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponseDto> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
-        // todo: (PR-Review) reservation only needed for staff, consumer and reservation date
-        log.info("Making reservation by consumer for staff with: {}", reservationCreateDto.toString());
-        return new ResponseEntity<>(reservationService.makeNewReservation(reservationCreateDto), HttpStatus.CREATED);
+    @PostMapping()
+    public ResponseEntity<ReservationResponseDto> create(@Valid @RequestBody ReservationCreateDto reservationCreateDto) {
+        log.info("Making a reservation by consumerId:{} in:{}",
+                reservationCreateDto.getConsumerId(),
+                reservationCreateDto.getReservationStartAt());
+        return new ResponseEntity<>(reservationService.save(reservationCreateDto), HttpStatus.CREATED);
     }
 
-    // todo: (PR-Review) fix the api name and change method name: getAssignedReservations
-    @GetMapping("/reservations/staff/{id}")
-    public ResponseEntity<List<ReservationResponseDto>> getStaffReservations(@PathVariable("id") long id){
-        // todo: (PR-Review) fix the method name: getAllReservationByStaff
-        // todo: (PR-Review) change the variable name to reservations
-        List<ReservationResponseDto> allReservationByStaff = reservationService.getAllReservationByStaff(id);
-        // todo: (PR-Review) Change the message to : Fetched {} reservation by staffId {}
-        log.info("Getting all reservations by staff with size: {}", allReservationByStaff.size());
-        return ResponseEntity.ok(allReservationByStaff);
+    @GetMapping("/staffs/{id}")
+    public ResponseEntity<List<ReservationResponseDto>> getAssignedReservations(@PathVariable("id") long id){
+        List<ReservationResponseDto> reservations = reservationService.getAllReservationByStaff(id);
+        log.info("Fetched {} reservations by staffId {}", reservations.size(),id);
+        return ResponseEntity.ok(reservations);
     }
 
-    @PostMapping("/reservations/starts")
+    @PostMapping("/status/update")
     public ResponseEntity<String> updateReservationStatus(@RequestBody ReservationStatusUpdateAction reservationStatusUpdateAction) {
         log.info("Updating reservation status by staff for id: {}", reservationStatusUpdateAction.getStaffId());
         reservationService.updateStatus(reservationStatusUpdateAction);

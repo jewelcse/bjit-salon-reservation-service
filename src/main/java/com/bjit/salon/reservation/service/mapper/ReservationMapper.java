@@ -17,7 +17,6 @@ import java.util.List;
 public interface ReservationMapper {
 
     ReservationResponseDto toReservationResponse(Reservation reservation);
-    //List<ReservationResponseDto> toReservationResponseList(List<Reservation> reservations);
 
     List<Catalog> toCatalogs(List<CatalogRequest> CatalogRequests);
 
@@ -48,11 +47,10 @@ public interface ReservationMapper {
         response.setId(reservation.getId());
         response.setStaffId(reservation.getStaffId());
         response.setConsumerId(reservation.getConsumerId());
-        response.setStartTime(reservation.getStartTime());
-        response.setEndTime(reservation.getEndTime());
+        response.setReservationStartAt(reservation.getReservationStartAt());
+        response.setReservationEndAt(reservation.getReservationEndAt());
         response.setPaymentMethod(reservation.getPaymentMethod());
         response.setWorkingStatus(reservation.getWorkingStatus());
-        response.setReservationDate(reservation.getReservationDate());
         response.setTotalPayableAmount(reservation.getTotalPayableAmount());
         response.setServices(catalogsToCatalogsResponse(reservation.getServices()));
         return response;
@@ -62,7 +60,7 @@ public interface ReservationMapper {
         CatalogResponse response = new CatalogResponse();
         response.setName(catalog.getName());
         response.setDescription(catalog.getDescription());
-        response.setApproximateTimeForCompletion(catalog.getApproximateTimeForCompletion());
+        response.setApproximateCompletionTime(catalog.getApproximateCompletionTime());
         response.setPayableAmount(catalog.getPayableAmount());
         return response;
     }

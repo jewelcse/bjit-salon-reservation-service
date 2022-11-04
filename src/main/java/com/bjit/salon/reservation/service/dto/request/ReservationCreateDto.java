@@ -1,13 +1,14 @@
 package com.bjit.salon.reservation.service.dto.request;
 
 
-import com.bjit.salon.reservation.service.entity.EPaymentMethod;
+import com.bjit.salon.reservation.service.entity.PaymentMethod;
 import lombok.*;
 
-import java.sql.Timestamp;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -17,19 +18,14 @@ import java.util.List;
 @Getter
 @ToString
 public class ReservationCreateDto {
-    // todo: (PR-Review) Remove unnecessary comments
-    // todo: (PR-Review) Use Instant instead of LocalData
-    // todo: (PR-Review) Add validation for important properties
-    private long staffId;   // staff id
-    private long consumerId; // user id
-    private LocalDate reservationDate;
-    private LocalTime startTime;
-
-    private LocalTime endTime;// will be calculated dynamically
-
-    private double totalPayableAmount; // will be calculated dynamically
-
-    // todo: (PR-Review) Remove E from this ENUM name
-    private EPaymentMethod paymentMethod; // payment method
+    @NotNull(message = "consumer id can't be null")
+    private long staffId;
+    @NotNull(message = "consumer id can't be null")
+    private long consumerId;
+    @NotNull(message = "reservation time can't be null")
+    private Instant reservationStartAt;
+    @NotNull(message = "payment method can't be null")
+    private PaymentMethod paymentMethod;
+    @NotEmpty(message = "services can't be null")
     private List<CatalogRequest> services;
 }

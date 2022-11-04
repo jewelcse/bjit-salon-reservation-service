@@ -14,5 +14,5 @@ public interface ReservationService {
 
     StaffActivityCreateAndUpdateDto updateStatus(ReservationStatusUpdateAction reservationStatusUpdateAction);
 
-    ReservationResponseDto makeNewReservation(ReservationCreateDto reservationCreateDto);
+    ReservationResponseDto save(ReservationCreateDto reservationCreateDto);
 }

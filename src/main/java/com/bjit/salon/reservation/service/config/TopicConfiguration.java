@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
-import static com.bjit.salon.reservation.service.util.ConstraintsUtil.STAFF_NEW_ACTIVITY_TOPIC;
+import static com.bjit.salon.reservation.service.util.Utils.STAFF_NEW_ACTIVITY_TOPIC;
 
 @Configuration
 public class TopicConfiguration {

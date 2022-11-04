@@ -11,7 +11,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import static com.bjit.salon.reservation.service.util.ConstraintsUtil.STAFF_NEW_ACTIVITY_TOPIC;
+import static com.bjit.salon.reservation.service.util.Utils.STAFF_NEW_ACTIVITY_TOPIC;
 
 @RequiredArgsConstructor
 @Service

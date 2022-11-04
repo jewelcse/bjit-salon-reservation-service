@@ -11,6 +11,6 @@ public class CatalogResponse {
 
     private String name;
     private String description;
-    private int approximateTimeForCompletion;
+    private int approximateCompletionTime;
     private double payableAmount;
 }

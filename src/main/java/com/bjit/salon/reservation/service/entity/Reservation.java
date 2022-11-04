@@ -23,15 +23,17 @@ public class Reservation {
     private Long id;
     private long staffId;
     private long consumerId;
-    private LocalDate reservationDate;
-    private LocalTime startTime;
-    private LocalTime endTime;
+
+    private Instant reservationStartAt;
+
+    private Instant reservationEndAt;
+
     @Column(name = "working_status")
     @Enumerated(EnumType.STRING)
-    private EWorkingStatus workingStatus;
+    private WorkingStatus workingStatus;
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
-    private EPaymentMethod paymentMethod;
+    private PaymentMethod paymentMethod;
     @Column(name = "total_payable_amount")
     private double totalPayableAmount;
 

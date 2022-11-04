@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.dto.request;
 
 
-import com.bjit.salon.reservation.service.entity.EWorkingStatus;
+import com.bjit.salon.reservation.service.entity.WorkingStatus;
 import lombok.*;
 
 @AllArgsConstructor
@@ -13,6 +13,6 @@ import lombok.*;
 public class ReservationStatusUpdateAction {
 
     private long id; // reservation id
-    private long staffId; // staff id
-    private EWorkingStatus status;
+    private long staffId;
+    private WorkingStatus status;
 }
