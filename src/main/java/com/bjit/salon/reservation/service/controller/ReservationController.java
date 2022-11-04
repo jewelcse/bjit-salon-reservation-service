@@ -26,6 +26,7 @@ public class ReservationController {
 
     @PostMapping()
     public ResponseEntity<ReservationResponseDto> create(@Valid @RequestBody ReservationCreateDto reservationCreateDto) {
+        // todo: Change making to creating
         log.info("Making a reservation by consumerId:{} in:{}",
                 reservationCreateDto.getConsumerId(),
                 reservationCreateDto.getReservationStartAt());
@@ -34,6 +35,7 @@ public class ReservationController {
 
     @GetMapping("/staffs/{id}")
     public ResponseEntity<List<ReservationResponseDto>> getAssignedReservations(@PathVariable("id") long id){
+        // todo: Change getAllReservations to getReservationsStaffId
         List<ReservationResponseDto> reservations = reservationService.getAllReservationByStaff(id);
         log.info("Fetched {} reservations by staffId {}", reservations.size(),id);
         return ResponseEntity.ok(reservations);
@@ -42,7 +44,9 @@ public class ReservationController {
     @PostMapping("/status/update")
     public ResponseEntity<String> updateReservationStatus(@RequestBody ReservationStatusUpdateAction reservationStatusUpdateAction) {
         log.info("Updating reservation status by staff for id: {}", reservationStatusUpdateAction.getStaffId());
+        // todo: give response from this method
         reservationService.updateStatus(reservationStatusUpdateAction);
+        // todo: change message: reservation {id} status update to {status}
         return ResponseEntity.ok("Updated status");
     }
 

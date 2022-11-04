@@ -18,9 +18,11 @@ import java.util.List;
 @Getter
 @ToString
 public class ReservationCreateDto {
+    // todo: Make sure, OL will not support
     @NotNull(message = "consumer id can't be null")
     private long staffId;
     @NotNull(message = "consumer id can't be null")
+    // todo: Make sure, OL will not support
     private long consumerId;
     @NotNull(message = "reservation time can't be null")
     private Instant reservationStartAt;
