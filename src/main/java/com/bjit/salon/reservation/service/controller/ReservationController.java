@@ -2,7 +2,7 @@ package com.bjit.salon.reservation.service.controller;
 
 
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
-import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateAction;
+import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateDto;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +42,10 @@ public class ReservationController {
     }
 
     @PostMapping("/status/update")
-    public ResponseEntity<String> updateReservationStatus(@RequestBody ReservationStatusUpdateAction reservationStatusUpdateAction) {
-        log.info("Updating reservation status by staff for id: {}", reservationStatusUpdateAction.getStaffId());
+    public ResponseEntity<String> updateReservationStatus(@RequestBody ReservationStatusUpdateDto reservationStatusUpdateDto) {
+        log.info("Updating reservation status by staff for id: {}", reservationStatusUpdateDto.getStaffId());
         // todo: give response from this method
-        reservationService.updateStatus(reservationStatusUpdateAction);
+        reservationService.updateStatus(reservationStatusUpdateDto);
         // todo: change message: reservation {id} status update to {status}
         return ResponseEntity.ok("Updated status");
     }

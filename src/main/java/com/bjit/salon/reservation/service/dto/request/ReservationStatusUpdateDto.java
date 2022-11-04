@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @ToString
 // todo: Change class name to: ReservationStatusUpdateDto
-public class ReservationStatusUpdateAction {
+public class ReservationStatusUpdateDto {
     // todo: change id to reservationId
     //todo: Validate
     private long id; // reservation id

@@ -3,7 +3,7 @@ package com.bjit.salon.reservation.service.serviceImpl
 import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto
-import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateAction
+import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateDto
 import com.bjit.salon.reservation.service.entity.Catalog
 import com.bjit.salon.reservation.service.entity.PaymentMethod
 import com.bjit.salon.reservation.service.entity.WorkingStatus
@@ -184,7 +184,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw reservation not found exception while updating the reservation status"() {
 
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(2L)
                 .staffId(1L)
                 .status(WorkingStatus.ALLOCATED)
@@ -204,7 +204,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw you can not cancel the reservation exception while cancelling the reservation because the reservation already allocated"() {
 
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.CANCELLED)
@@ -238,7 +238,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw you can not cancel the reservation exception while cancelling the reservation because the reservation already is processing"() {
 
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.CANCELLED)
@@ -272,7 +272,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw you can not cancel the reservation exception while cancelling the reservation because the reservation already completed"() {
 
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.CANCELLED)
@@ -306,7 +306,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw already cancelled reservation exception while cancelling the reservation"() {
 
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.CANCELLED)
@@ -340,7 +340,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should cancelled reservation"() {
 
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.CANCELLED)
@@ -374,7 +374,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw canceled reservation can't be re-initiated-allocated-processing-completed exception while trying to re-initiated-allocated-processing-completed"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.ALLOCATED)
@@ -406,7 +406,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while you re-allocate the reservation bcz the reservation already in processing stage"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.ALLOCATED)
@@ -438,7 +438,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while you re-allocate the reservation bcz the reservation already in completed stage"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.ALLOCATED)
@@ -470,7 +470,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while you re-allocate the reservation bcz the reservation already in allocated stage"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.ALLOCATED)
@@ -502,7 +502,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should allocate the reservation after initiated it"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.ALLOCATED)
@@ -549,7 +549,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while you re-processing the reservation bcz the reservation already in completed stage"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.PROCESSING)
@@ -581,7 +581,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while you re-processing the reservation bcz the reservation already in processing stage"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.PROCESSING)
@@ -613,7 +613,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should processing the reservation after allocated it"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.PROCESSING)
@@ -659,7 +659,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while you re-completing the reservation bcz the reservation already in completed stage"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.COMPLETED)
@@ -691,7 +691,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should completed the reservation after processing it"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.COMPLETED)
@@ -737,7 +737,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while processing it before allocation"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.PROCESSING)
@@ -769,7 +769,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while completed it before processing"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.COMPLETED)
@@ -801,7 +801,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
     def "should throw exception while re initiated since the reservation is already in initiated stage"(){
         given:
-        def updateRequest = ReservationStatusUpdateAction.builder()
+        def updateRequest = ReservationStatusUpdateDto.builder()
                 .id(1L)
                 .staffId(1L)
                 .status(WorkingStatus.INITIATED)

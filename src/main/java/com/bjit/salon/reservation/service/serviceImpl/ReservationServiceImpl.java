@@ -4,12 +4,11 @@ package com.bjit.salon.reservation.service.serviceImpl;
 import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto;
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest;
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
-import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateAction;
+import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateDto;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
 import com.bjit.salon.reservation.service.entity.WorkingStatus;
 import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.exception.ReservationNotFoundException;
-import com.bjit.salon.reservation.service.exception.ReservationTerminatedOrCanceledException;
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException;
 import com.bjit.salon.reservation.service.mapper.ReservationMapper;
 import com.bjit.salon.reservation.service.producer.ReservationProducer;
@@ -42,61 +41,27 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public StaffActivityCreateAndUpdateDto updateStatus(ReservationStatusUpdateAction reservationStatusUpdateAction) {
-        Optional<Reservation> currentReservation = reservationRepository.findById(reservationStatusUpdateAction.getId());
+    public StaffActivityCreateAndUpdateDto updateStatus(ReservationStatusUpdateDto reservationStatusUpdateDto) {
+        Optional<Reservation> currentReservation = reservationRepository.findById(reservationStatusUpdateDto.getId());
         // todo: fix this code
         if (currentReservation.isEmpty()) {
             // todo: Reservation {id} is not found
-            throw new ReservationNotFoundException("The reservation not found for id: " + reservationStatusUpdateAction.getId());
+            throw new ReservationNotFoundException("The reservation not found for id: " + reservationStatusUpdateDto.getId());
         }
 
-        if (reservationStatusUpdateAction.getStatus() == WorkingStatus.CANCELLED) {
+        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.CANCELLED) {
             cancelReservation(currentReservation.get());
         }
-        if (reservationStatusUpdateAction.getStatus() == WorkingStatus.ALLOCATED) {
-
+        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.ALLOCATED) {
+            allocateReservation(currentReservation.get());
+        }
+        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.PROCESSING){
+            processReservation(currentReservation.get());
+        }
+        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.COMPLETED) {
+            completeReservation(currentReservation.get());
         }
 
-        if (reservationStatusUpdateAction.getStatus() == WorkingStatus.ALLOCATED) {
-            if (currentReservation.get().getWorkingStatus() == WorkingStatus.PROCESSING
-                    || currentReservation.get().getWorkingStatus() == WorkingStatus.COMPLETED) {
-                throw new ReservationTerminatedOrCanceledException("You can't be re-allocate the reservation!");
-            } else if (currentReservation.get().getWorkingStatus() == WorkingStatus.ALLOCATED) {
-                throw new ReservationTerminatedOrCanceledException("The reservation is already in ALLOCATED stage!");
-            } else {
-                if (currentReservation.get().getWorkingStatus() == WorkingStatus.INITIATED) {
-                    currentReservation.get().setWorkingStatus(WorkingStatus.ALLOCATED);
-                    reservationRepository.save(currentReservation.get());
-                }
-            }
-        } else if (reservationStatusUpdateAction.getStatus() == WorkingStatus.PROCESSING) {
-            if (currentReservation.get().getWorkingStatus() == WorkingStatus.COMPLETED) {
-                throw new ReservationTerminatedOrCanceledException("You can't be re-processing the reservation!");
-            } else if (currentReservation.get().getWorkingStatus() == WorkingStatus.PROCESSING) {
-                throw new ReservationTerminatedOrCanceledException("The reservation is already in PROCESSING stage!");
-            } else {
-                if (currentReservation.get().getWorkingStatus() == WorkingStatus.ALLOCATED) {
-                    currentReservation.get().setWorkingStatus(WorkingStatus.PROCESSING);
-                    reservationRepository.save(currentReservation.get());
-                } else {
-                    throw new ReservationTerminatedOrCanceledException("You can't be process a reservation without allocated it before");
-                }
-            }
-        } else if (reservationStatusUpdateAction.getStatus() == WorkingStatus.COMPLETED) {
-            if (currentReservation.get().getWorkingStatus() == WorkingStatus.COMPLETED) {
-                throw new ReservationTerminatedOrCanceledException("The reservation is already in COMPLETED stage!");
-            }
-            if (currentReservation.get().getWorkingStatus() == WorkingStatus.PROCESSING) {
-                currentReservation.get().setWorkingStatus(WorkingStatus.COMPLETED);
-                reservationRepository.save(currentReservation.get());
-            } else {
-                throw new ReservationTerminatedOrCanceledException("You can't be complete a reservation without processed it before");
-            }
-        } else {
-            throw new ReservationTerminatedOrCanceledException("You can't re-initiated the reservation again!");
-        }
-
-        // notify the staff-service for creating a new activity/ update the status
         StaffActivityCreateAndUpdateDto newActivityAndUpdateStatus = StaffActivityCreateAndUpdateDto
                 .builder()
                 .staffId(currentReservation.get().getStaffId())
@@ -110,13 +75,38 @@ public class ReservationServiceImpl implements ReservationService {
 
     }
 
+    private Reservation completeReservation(Reservation reservation){
+        if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
+                && reservation.getWorkingStatus() == WorkingStatus.PROCESSING){
+            reservation.setWorkingStatus(WorkingStatus.COMPLETED);
+            reservation = reservationRepository.save(reservation);
+        }
+        return reservation;
+    }
+
+    private Reservation processReservation(Reservation reservation){
+        if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
+                && reservation.getWorkingStatus() == WorkingStatus.ALLOCATED){
+            reservation.setWorkingStatus(WorkingStatus.PROCESSING);
+            reservation = reservationRepository.save(reservation);
+        }
+        return reservation;
+    }
+
+    private Reservation allocateReservation(Reservation reservation) {
+        if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
+                && reservation.getWorkingStatus() == WorkingStatus.INITIATED){
+            reservation.setWorkingStatus(WorkingStatus.ALLOCATED);
+            reservation = reservationRepository.save(reservation);
+        }
+        return reservation;
+    }
+
     private Reservation cancelReservation(Reservation reservation) {
         // todo: checking WorkingStatus: CANCELLED
         // todo: Change class name: WorkingStatus to ReservationStatus
         if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
-                && reservation.getWorkingStatus() == WorkingStatus.INITIATED
-
-        ) {
+                && reservation.getWorkingStatus() == WorkingStatus.INITIATED) {
             reservation.setWorkingStatus(WorkingStatus.CANCELLED);
             reservation = reservationRepository.save(reservation);
         }
