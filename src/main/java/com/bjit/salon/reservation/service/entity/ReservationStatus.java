@@ -1,6 +1,6 @@
 package com.bjit.salon.reservation.service.entity;
 
-public enum WorkingStatus {
+public enum ReservationStatus {
     INITIATED,
     PROCESSING,
     RUNNING,

@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.producer;
 
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto;
+import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +18,10 @@ import static com.bjit.salon.reservation.service.util.Utils.STAFF_NEW_ACTIVITY_T
 public class ReservationProducer {
     private final static Logger log = LoggerFactory.getLogger(ReservationProducer.class);
 
-    private final KafkaTemplate<String, StaffActivityCreateAndUpdateDto> kafkaTemplate;
+    private final KafkaTemplate<String, StaffActivityDto> kafkaTemplate;
 
-    public StaffActivityCreateAndUpdateDto createNewActivityAndUpdateActivityStatus(StaffActivityCreateAndUpdateDto staffActivity){
-        Message<StaffActivityCreateAndUpdateDto> message = MessageBuilder
+    public StaffActivityDto updateActivity(StaffActivityDto staffActivity){
+        Message<StaffActivityDto> message = MessageBuilder
                 .withPayload(staffActivity)
                 .setHeader(KafkaHeaders.TOPIC,STAFF_NEW_ACTIVITY_TOPIC)
                 .build();

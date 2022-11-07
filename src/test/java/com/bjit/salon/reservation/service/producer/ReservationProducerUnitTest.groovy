@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.producer
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto
-import com.bjit.salon.reservation.service.entity.WorkingStatus
+import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto
+import com.bjit.salon.reservation.service.entity.ReservationStatus
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.KafkaHeaders
@@ -13,7 +13,7 @@ import static com.bjit.salon.reservation.service.util.ConstraintsUtil.STAFF_NEW_
 @SpringBootTest
 class ReservationProducerUnitTest extends Specification {
 
-    private KafkaTemplate<String, StaffActivityCreateAndUpdateDto> kafkaTemplate;
+    private KafkaTemplate<String, StaffActivityDto> kafkaTemplate;
     private ReservationProducer producer;
 
     def setup(){
@@ -23,11 +23,11 @@ class ReservationProducerUnitTest extends Specification {
 
     def "should update and create the staff new activity"() {
         given:
-        def updateRequest = StaffActivityCreateAndUpdateDto.builder()
+        def updateRequest = StaffActivityDto.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)
-                .workingStatus(WorkingStatus.ALLOCATED)
+                .workingStatus(ReservationStatus.ALLOCATED)
                 .startTime(null)
                 .endTime(null)
                 .consumerId(1L)
@@ -45,7 +45,7 @@ class ReservationProducerUnitTest extends Specification {
 
         then:
         response.getConsumerId() == 1
-        response.getWorkingStatus() ==WorkingStatus.ALLOCATED
+        response.getReservationStatus() ==ReservationStatus.ALLOCATED
     }
 
 

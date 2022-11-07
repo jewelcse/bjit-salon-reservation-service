@@ -50,7 +50,7 @@ public interface ReservationMapper {
         response.setReservationStartAt(reservation.getReservationStartAt());
         response.setReservationEndAt(reservation.getReservationEndAt());
         response.setPaymentMethod(reservation.getPaymentMethod());
-        response.setWorkingStatus(reservation.getWorkingStatus());
+        response.setReservationStatus(reservation.getReservationStatus());
         response.setTotalPayableAmount(reservation.getTotalPayableAmount());
         response.setServices(catalogsToCatalogsResponse(reservation.getServices()));
         return response;

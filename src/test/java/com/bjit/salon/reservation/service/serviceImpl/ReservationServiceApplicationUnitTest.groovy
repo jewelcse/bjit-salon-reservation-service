@@ -1,12 +1,12 @@
 package com.bjit.salon.reservation.service.serviceImpl
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto
+import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto
 import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateDto
 import com.bjit.salon.reservation.service.entity.Catalog
 import com.bjit.salon.reservation.service.entity.PaymentMethod
-import com.bjit.salon.reservation.service.entity.WorkingStatus
+import com.bjit.salon.reservation.service.entity.ReservationStatus
 import com.bjit.salon.reservation.service.entity.Reservation
 import com.bjit.salon.reservation.service.exception.ReservationNotFoundException
 import com.bjit.salon.reservation.service.exception.ReservationTerminatedOrCanceledException
@@ -118,7 +118,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(endTime)
                 .services(responseServices)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.INITIATED)
+                .workingStatus(ReservationStatus.INITIATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(reservationDate)
@@ -136,7 +136,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
         response.getServices().size() == 3
         response.getStartTime() == LocalTime.parse("10:00:00")
         response.getEndTime() == LocalTime.parse("11:20:00")
-        response.getWorkingStatus() == WorkingStatus.INITIATED
+        response.getWorkingStatus() == ReservationStatus.INITIATED
         response.getPaymentMethod() == PaymentMethod.CARD
         response.getStaffId() == 1
         response.getReservationDate() == reservationDate
@@ -185,9 +185,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(2L)
+                .reservationId(2L)
                 .staffId(1L)
-                .status(WorkingStatus.ALLOCATED)
+                .status(ReservationStatus.ALLOCATED)
                 .build()
 
         reservationRepository.findById(2L) >> Optional.ofNullable(null)
@@ -205,9 +205,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.CANCELLED)
+                .status(ReservationStatus.CANCELLED)
                 .build()
 
         def reservation = Reservation
@@ -217,7 +217,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.ALLOCATED)
+                .workingStatus(ReservationStatus.ALLOCATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -239,9 +239,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.CANCELLED)
+                .status(ReservationStatus.CANCELLED)
                 .build()
 
         def reservation = Reservation
@@ -251,7 +251,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.PROCESSING)
+                .workingStatus(ReservationStatus.PROCESSING)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -273,9 +273,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.CANCELLED)
+                .status(ReservationStatus.CANCELLED)
                 .build()
 
         def reservation = Reservation
@@ -285,7 +285,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.COMPLETED)
+                .workingStatus(ReservationStatus.COMPLETED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -307,9 +307,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.CANCELLED)
+                .status(ReservationStatus.CANCELLED)
                 .build()
 
         def reservation = Reservation
@@ -319,7 +319,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.CANCELLED)
+                .workingStatus(ReservationStatus.CANCELLED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -341,9 +341,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
 
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.CANCELLED)
+                .status(ReservationStatus.CANCELLED)
                 .build()
 
         def reservation = Reservation
@@ -353,7 +353,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.INITIATED)
+                .workingStatus(ReservationStatus.INITIATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -375,9 +375,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw canceled reservation can't be re-initiated-allocated-processing-completed exception while trying to re-initiated-allocated-processing-completed"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.ALLOCATED)
+                .status(ReservationStatus.ALLOCATED)
                 .build()
 
         def reservation = Reservation
@@ -387,7 +387,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.CANCELLED)
+                .workingStatus(ReservationStatus.CANCELLED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -407,9 +407,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw exception while you re-allocate the reservation bcz the reservation already in processing stage"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.ALLOCATED)
+                .status(ReservationStatus.ALLOCATED)
                 .build()
 
         def reservation = Reservation
@@ -419,7 +419,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.PROCESSING)
+                .workingStatus(ReservationStatus.PROCESSING)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -439,9 +439,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw exception while you re-allocate the reservation bcz the reservation already in completed stage"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.ALLOCATED)
+                .status(ReservationStatus.ALLOCATED)
                 .build()
 
         def reservation = Reservation
@@ -451,7 +451,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.COMPLETED)
+                .workingStatus(ReservationStatus.COMPLETED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -471,9 +471,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw exception while you re-allocate the reservation bcz the reservation already in allocated stage"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.ALLOCATED)
+                .status(ReservationStatus.ALLOCATED)
                 .build()
 
         def reservation = Reservation
@@ -483,7 +483,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.ALLOCATED)
+                .workingStatus(ReservationStatus.ALLOCATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -503,9 +503,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should allocate the reservation after initiated it"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.ALLOCATED)
+                .status(ReservationStatus.ALLOCATED)
                 .build()
 
         def reservation = Reservation
@@ -515,18 +515,18 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.INITIATED)
+                .workingStatus(ReservationStatus.INITIATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
                 .totalPayableAmount(100.00)
                 .build()
 
-        def updateResponse = StaffActivityCreateAndUpdateDto.builder()
+        def updateResponse = StaffActivityDto.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)
-                .workingStatus(WorkingStatus.ALLOCATED)
+                .workingStatus(ReservationStatus.ALLOCATED)
                 .startTime(null)
                 .endTime(null)
                 .consumerId(1L)
@@ -543,16 +543,16 @@ class ReservationServiceApplicationUnitTest extends Specification {
         then:
         response.getStaffId() == 1
         response.getConsumerId() == 1
-        response.getWorkingStatus() == WorkingStatus.ALLOCATED
+        response.getReservationStatus() == ReservationStatus.ALLOCATED
 
     }
 
     def "should throw exception while you re-processing the reservation bcz the reservation already in completed stage"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.PROCESSING)
+                .status(ReservationStatus.PROCESSING)
                 .build()
 
         def reservation = Reservation
@@ -562,7 +562,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.COMPLETED)
+                .workingStatus(ReservationStatus.COMPLETED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -582,9 +582,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw exception while you re-processing the reservation bcz the reservation already in processing stage"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.PROCESSING)
+                .status(ReservationStatus.PROCESSING)
                 .build()
 
         def reservation = Reservation
@@ -594,7 +594,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.PROCESSING)
+                .workingStatus(ReservationStatus.PROCESSING)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -614,9 +614,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should processing the reservation after allocated it"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.PROCESSING)
+                .status(ReservationStatus.PROCESSING)
                 .build()
 
         def reservation = Reservation
@@ -626,18 +626,18 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.ALLOCATED)
+                .workingStatus(ReservationStatus.ALLOCATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
                 .totalPayableAmount(100.00)
                 .build()
 
-        def updateResponse = StaffActivityCreateAndUpdateDto.builder()
+        def updateResponse = StaffActivityDto.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)
-                .workingStatus(WorkingStatus.PROCESSING)
+                .workingStatus(ReservationStatus.PROCESSING)
                 .startTime(null)
                 .endTime(null)
                 .consumerId(1L)
@@ -654,15 +654,15 @@ class ReservationServiceApplicationUnitTest extends Specification {
         then:
         response.getStaffId() == 1
         response.getConsumerId() == 1
-        response.getWorkingStatus() == WorkingStatus.PROCESSING
+        response.getReservationStatus() == ReservationStatus.PROCESSING
     }
 
     def "should throw exception while you re-completing the reservation bcz the reservation already in completed stage"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.COMPLETED)
+                .status(ReservationStatus.COMPLETED)
                 .build()
 
         def reservation = Reservation
@@ -672,7 +672,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.COMPLETED)
+                .workingStatus(ReservationStatus.COMPLETED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -692,9 +692,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should completed the reservation after processing it"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.COMPLETED)
+                .status(ReservationStatus.COMPLETED)
                 .build()
 
         def reservation = Reservation
@@ -704,18 +704,18 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.PROCESSING)
+                .workingStatus(ReservationStatus.PROCESSING)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
                 .totalPayableAmount(100.00)
                 .build()
 
-        def updateResponse = StaffActivityCreateAndUpdateDto.builder()
+        def updateResponse = StaffActivityDto.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)
-                .workingStatus(WorkingStatus.COMPLETED)
+                .workingStatus(ReservationStatus.COMPLETED)
                 .startTime(null)
                 .endTime(null)
                 .consumerId(1L)
@@ -732,15 +732,15 @@ class ReservationServiceApplicationUnitTest extends Specification {
         then:
         response.getStaffId() == 1
         response.getConsumerId() == 1
-        response.getWorkingStatus() == WorkingStatus.COMPLETED
+        response.getReservationStatus() == ReservationStatus.COMPLETED
     }
 
     def "should throw exception while processing it before allocation"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.PROCESSING)
+                .status(ReservationStatus.PROCESSING)
                 .build()
 
         def reservation = Reservation
@@ -750,7 +750,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.INITIATED)
+                .workingStatus(ReservationStatus.INITIATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -770,9 +770,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw exception while completed it before processing"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.COMPLETED)
+                .status(ReservationStatus.COMPLETED)
                 .build()
 
         def reservation = Reservation
@@ -782,7 +782,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.ALLOCATED)
+                .workingStatus(ReservationStatus.ALLOCATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)
@@ -802,9 +802,9 @@ class ReservationServiceApplicationUnitTest extends Specification {
     def "should throw exception while re initiated since the reservation is already in initiated stage"(){
         given:
         def updateRequest = ReservationStatusUpdateDto.builder()
-                .id(1L)
+                .reservationId(1L)
                 .staffId(1L)
-                .status(WorkingStatus.INITIATED)
+                .status(ReservationStatus.INITIATED)
                 .build()
 
         def reservation = Reservation
@@ -814,7 +814,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .endTime(null)
                 .services(null)
                 .consumerId(1L)
-                .workingStatus(WorkingStatus.INITIATED)
+                .workingStatus(ReservationStatus.INITIATED)
                 .paymentMethod(PaymentMethod.CARD)
                 .staffId(1L)
                 .reservationDate(null)

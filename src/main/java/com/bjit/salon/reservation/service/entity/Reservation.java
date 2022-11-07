@@ -4,8 +4,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -30,7 +28,7 @@ public class Reservation {
 
     @Column(name = "working_status")
     @Enumerated(EnumType.STRING)
-    private WorkingStatus workingStatus;
+    private ReservationStatus reservationStatus;
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;

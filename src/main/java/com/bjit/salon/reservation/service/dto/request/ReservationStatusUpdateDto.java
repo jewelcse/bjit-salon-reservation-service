@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.dto.request;
 
 
-import com.bjit.salon.reservation.service.entity.WorkingStatus;
+import com.bjit.salon.reservation.service.entity.ReservationStatus;
 import lombok.*;
 
 @AllArgsConstructor
@@ -10,11 +10,10 @@ import lombok.*;
 @Getter
 @Builder
 @ToString
-// todo: Change class name to: ReservationStatusUpdateDto
 public class ReservationStatusUpdateDto {
-    // todo: change id to reservationId
+
     //todo: Validate
-    private long id; // reservation id
+    private long reservationId;
     private long staffId;
-    private WorkingStatus status;
+    private ReservationStatus status;
 }

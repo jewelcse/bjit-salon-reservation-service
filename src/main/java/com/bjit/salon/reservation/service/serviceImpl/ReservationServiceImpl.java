@@ -1,12 +1,12 @@
 package com.bjit.salon.reservation.service.serviceImpl;
 
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto;
+import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto;
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest;
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
 import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateDto;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
-import com.bjit.salon.reservation.service.entity.WorkingStatus;
+import com.bjit.salon.reservation.service.entity.ReservationStatus;
 import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.exception.ReservationNotFoundException;
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException;
@@ -41,83 +41,86 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public StaffActivityCreateAndUpdateDto updateStatus(ReservationStatusUpdateDto reservationStatusUpdateDto) {
-        Optional<Reservation> currentReservation = reservationRepository.findById(reservationStatusUpdateDto.getId());
-        // todo: fix this code
+    public Reservation updateStatus(ReservationStatusUpdateDto reservationStatusUpdateDto) {
+        Optional<Reservation> currentReservation = reservationRepository.findById(reservationStatusUpdateDto.getReservationId());
         if (currentReservation.isEmpty()) {
-            // todo: Reservation {id} is not found
-            throw new ReservationNotFoundException("The reservation not found for id: " + reservationStatusUpdateDto.getId());
+            throw new ReservationNotFoundException("Reservation id is not found: " + reservationStatusUpdateDto.getReservationId());
+        }
+        Reservation updatedReservation = null;
+        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.CANCELLED) {
+            updatedReservation = cancelReservation(currentReservation.get());
+        }
+        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.ALLOCATED) {
+            updatedReservation = allocateReservation(currentReservation.get());
+        }
+        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.PROCESSING){
+            updatedReservation = processReservation(currentReservation.get());
+        }
+        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.COMPLETED) {
+            updatedReservation = completeReservation(currentReservation.get());
         }
 
-        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.CANCELLED) {
-            cancelReservation(currentReservation.get());
-        }
-        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.ALLOCATED) {
-            allocateReservation(currentReservation.get());
-        }
-        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.PROCESSING){
-            processReservation(currentReservation.get());
-        }
-        if (reservationStatusUpdateDto.getStatus() == WorkingStatus.COMPLETED) {
-            completeReservation(currentReservation.get());
-        }
+        publishActivity(updatedReservation);
 
-        StaffActivityCreateAndUpdateDto newActivityAndUpdateStatus = StaffActivityCreateAndUpdateDto
+        return updatedReservation;
+    }
+
+    private StaffActivityDto publishActivity(Reservation reservation){
+        StaffActivityDto newActivityAndUpdateStatus = StaffActivityDto
                 .builder()
-                .staffId(currentReservation.get().getStaffId())
-                .consumerId(currentReservation.get().getConsumerId())
-                .reservationId(currentReservation.get().getId())
-                .reservationStartAt(currentReservation.get().getReservationStartAt())
-                .reservationEndAt(currentReservation.get().getReservationEndAt())
-                .workingStatus(currentReservation.get().getWorkingStatus())
+                .staffId(reservation.getStaffId())
+                .consumerId(reservation.getConsumerId())
+                .reservationId(reservation.getId())
+                .reservationStartAt(reservation.getReservationStartAt())
+                .reservationEndAt(reservation.getReservationEndAt())
+                .reservationStatus(reservation.getReservationStatus())
                 .build();
-        return reservationProducer.createNewActivityAndUpdateActivityStatus(newActivityAndUpdateStatus);
-
+        return reservationProducer.updateActivity(newActivityAndUpdateStatus);
     }
 
     private Reservation completeReservation(Reservation reservation){
-        if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
-                && reservation.getWorkingStatus() == WorkingStatus.PROCESSING){
-            reservation.setWorkingStatus(WorkingStatus.COMPLETED);
+        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
+                && reservation.getReservationStatus() == ReservationStatus.PROCESSING){
+            reservation.setReservationStatus(ReservationStatus.COMPLETED);
             reservation = reservationRepository.save(reservation);
         }
         return reservation;
     }
 
     private Reservation processReservation(Reservation reservation){
-        if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
-                && reservation.getWorkingStatus() == WorkingStatus.ALLOCATED){
-            reservation.setWorkingStatus(WorkingStatus.PROCESSING);
+        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
+                && reservation.getReservationStatus() == ReservationStatus.ALLOCATED){
+            reservation.setReservationStatus(ReservationStatus.PROCESSING);
             reservation = reservationRepository.save(reservation);
         }
         return reservation;
     }
 
     private Reservation allocateReservation(Reservation reservation) {
-        if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
-                && reservation.getWorkingStatus() == WorkingStatus.INITIATED){
-            reservation.setWorkingStatus(WorkingStatus.ALLOCATED);
+        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
+                && reservation.getReservationStatus() == ReservationStatus.INITIATED){
+            reservation.setReservationStatus(ReservationStatus.ALLOCATED);
             reservation = reservationRepository.save(reservation);
         }
         return reservation;
     }
 
     private Reservation cancelReservation(Reservation reservation) {
-        // todo: checking WorkingStatus: CANCELLED
-        // todo: Change class name: WorkingStatus to ReservationStatus
-        if (reservation.getWorkingStatus() != WorkingStatus.CANCELLED
-                && reservation.getWorkingStatus() == WorkingStatus.INITIATED) {
-            reservation.setWorkingStatus(WorkingStatus.CANCELLED);
+        // todo: checking ReservationStatus: CANCELLED
+        // todo: Change class name: ReservationStatus to ReservationStatus
+        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
+                && reservation.getReservationStatus() == ReservationStatus.INITIATED) {
+            reservation.setReservationStatus(ReservationStatus.CANCELLED);
             reservation = reservationRepository.save(reservation);
         }
         return reservation;
-        //todo: give seperate message for: ALLOCATE, PROCESSING, COMPLETED, CANCELLED
+        //todo: give separate message for: ALLOCATE, PROCESSING, COMPLETED, CANCELLED
     }
 
 
     // todo: debug the issue
-//    private boolean isNotReservable(WorkingStatus status) {
-//        return status != WorkingStatus.ALLOCATED || status != WorkingStatus.PROCESSING || status != WorkingStatus.COMPLETED;
+//    private boolean isNotReservable(ReservationStatus status) {
+//        return status != ReservationStatus.ALLOCATED || status != ReservationStatus.PROCESSING || status != ReservationStatus.COMPLETED;
 //    }
 
 
@@ -128,15 +131,14 @@ public class ReservationServiceImpl implements ReservationService {
         Instant approximateEndTime = reservationCreateDto.getReservationStartAt().plus(totalApproximatedTime, ChronoUnit.MINUTES);
 
         if (isReserved(reservationCreateDto.getReservationStartAt(), approximateEndTime)) {
-            // todo: Change the message to : Reservation slot has already been filled up at: reservation time
-            throw new StaffAlreadyEngagedException("The reservation has already taken on " + reservationCreateDto.getReservationStartAt());
+            throw new StaffAlreadyEngagedException("Reservation slot has already been filled up at:" + reservationCreateDto.getReservationStartAt());
         }
         Reservation newReservation = Reservation.builder()
                 .staffId(reservationCreateDto.getStaffId())
                 .consumerId(reservationCreateDto.getConsumerId())
                 .reservationStartAt(reservationCreateDto.getReservationStartAt())
                 .reservationEndAt(approximateEndTime)
-                .workingStatus(WorkingStatus.INITIATED)
+                .reservationStatus(ReservationStatus.INITIATED)
                 .paymentMethod(reservationCreateDto.getPaymentMethod())
                 .services(reservationMapper.toCatalogs(reservationCreateDto.getServices()))
                 .totalPayableAmount(getTotalPayableAmount(reservationCreateDto.getServices()))
