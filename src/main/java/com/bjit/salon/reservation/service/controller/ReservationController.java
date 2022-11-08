@@ -41,11 +41,18 @@ public class ReservationController {
     }
 
     @PostMapping("/status/update")
-    public ResponseEntity<Object> updateReservationStatus(@Valid @RequestBody ReservationStatusUpdateDto reservationStatusUpdateDto) {
+    // todo: We can make the name short, change the message
+    public ResponseEntity<String> updateReservationStatus(@Valid @RequestBody ReservationStatusUpdateDto reservationStatusUpdateDto) {
+//        log.info("reservation {} of staff {}, status is updated to {}", reservationStatusUpdateDto.getReservationId(), reservationStatusUpdateDto.getStaffId(), reservationStatusUpdateDto.getStatus());
         log.info("Updating reservation status by staff for id: {}", reservationStatusUpdateDto.getStaffId());
+        //todo: Use dto class instead of entity, respond with Dto
         Reservation reservation = reservationService.updateStatus(reservationStatusUpdateDto);
         return ResponseEntity.ok("Reservation "+ reservation.getId() +" status update to "+reservation.getReservationStatus());
     }
+
+    // delete  ->
+    // create -> Obj
+    // update -> Obj
 
 
 }

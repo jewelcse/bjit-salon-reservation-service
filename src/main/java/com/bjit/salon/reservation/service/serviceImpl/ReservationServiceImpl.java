@@ -13,6 +13,8 @@ import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException
 import com.bjit.salon.reservation.service.mapper.ReservationMapper;
 import com.bjit.salon.reservation.service.producer.ReservationProducer;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
+import com.bjit.salon.reservation.service.service.ReservationFactory;
+import com.bjit.salon.reservation.service.service.ReservationManager;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -46,14 +48,19 @@ public class ReservationServiceImpl implements ReservationService {
         if (currentReservation.isEmpty()) {
             throw new ReservationNotFoundException("Reservation id is not found: " + reservationStatusUpdateDto.getReservationId());
         }
-        Reservation updatedReservation = null;
+        // todo: Think of implementing any design pattern
+        Reservation updatedReservation = new Reservation();
         if (reservationStatusUpdateDto.getStatus() == ReservationStatus.CANCELLED) {
             updatedReservation = cancelReservation(currentReservation.get());
         }
+
+        updatedReservation = new ReservationFactory()
+                .reserve(reservationStatusUpdateDto.getStatus(), currentReservation.get());
+
         if (reservationStatusUpdateDto.getStatus() == ReservationStatus.ALLOCATED) {
             updatedReservation = allocateReservation(currentReservation.get());
         }
-        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.PROCESSING){
+        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.PROCESSING) {
             updatedReservation = processReservation(currentReservation.get());
         }
         if (reservationStatusUpdateDto.getStatus() == ReservationStatus.COMPLETED) {
@@ -61,11 +68,10 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         publishActivity(updatedReservation);
-
         return updatedReservation;
     }
 
-    private StaffActivityDto publishActivity(Reservation reservation){
+    private StaffActivityDto publishActivity(Reservation reservation) {
         StaffActivityDto newActivityAndUpdateStatus = StaffActivityDto
                 .builder()
                 .staffId(reservation.getStaffId())
@@ -78,44 +84,46 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationProducer.updateActivity(newActivityAndUpdateStatus);
     }
 
-    private Reservation completeReservation(Reservation reservation){
-        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
-                && reservation.getReservationStatus() == ReservationStatus.PROCESSING){
-            reservation.setReservationStatus(ReservationStatus.COMPLETED);
-            reservation = reservationRepository.save(reservation);
-        }
-        return reservation;
+    private Reservation completeReservation(Reservation reservation) {
+        return isNotCancelled(reservation.getReservationStatus())
+                && reservation.getReservationStatus() == ReservationStatus.PROCESSING
+                ? updateStatusAndSave(ReservationStatus.COMPLETED, reservation)
+                : reservation;
     }
 
-    private Reservation processReservation(Reservation reservation){
-        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
-                && reservation.getReservationStatus() == ReservationStatus.ALLOCATED){
-            reservation.setReservationStatus(ReservationStatus.PROCESSING);
-            reservation = reservationRepository.save(reservation);
+    private Reservation processReservation(Reservation reservation) {
+        if (isNotCancelled(reservation.getReservationStatus())
+                && reservation.getReservationStatus() == ReservationStatus.ALLOCATED) {
+            updateStatusAndSave(ReservationStatus.PROCESSING, reservation);
         }
         return reservation;
     }
 
     private Reservation allocateReservation(Reservation reservation) {
-        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
-                && reservation.getReservationStatus() == ReservationStatus.INITIATED){
-            reservation.setReservationStatus(ReservationStatus.ALLOCATED);
-            reservation = reservationRepository.save(reservation);
+        if (isNotCancelled(reservation.getReservationStatus())
+                && reservation.getReservationStatus() == ReservationStatus.INITIATED) {
+            updateStatusAndSave(ReservationStatus.ALLOCATED, reservation);
         }
         return reservation;
     }
 
     private Reservation cancelReservation(Reservation reservation) {
-        if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
-                && reservation.getReservationStatus() == ReservationStatus.INITIATED) {
-            reservation.setReservationStatus(ReservationStatus.CANCELLED);
-            reservation = reservationRepository.save(reservation);
+        if (isNotCancelled(reservation.getReservationStatus()) && reservation.getReservationStatus() == ReservationStatus.INITIATED) {
+            updateStatusAndSave(ReservationStatus.CANCELLED, reservation);
         }
         return reservation;
         //todo: give separate message for: ALLOCATE, PROCESSING, COMPLETED, CANCELLED
     }
 
 
+    private boolean isNotCancelled(ReservationStatus status) {
+        return status != ReservationStatus.CANCELLED;
+    }
+
+    private Reservation updateStatusAndSave(ReservationStatus status, Reservation reservation) {
+        reservation.setReservationStatus(status);
+        return reservationRepository.save(reservation);
+    }
     // todo: debug the issue
 //    private boolean isNotReservable(ReservationStatus status) {
 //        return status != ReservationStatus.ALLOCATED || status != ReservationStatus.PROCESSING || status != ReservationStatus.COMPLETED;
