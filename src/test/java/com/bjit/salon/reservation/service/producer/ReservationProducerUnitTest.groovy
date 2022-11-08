@@ -8,8 +8,6 @@ import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.support.MessageBuilder
 import spock.lang.Specification
 
-import static com.bjit.salon.reservation.service.util.ConstraintsUtil.STAFF_NEW_ACTIVITY_TOPIC
-
 @SpringBootTest
 class ReservationProducerUnitTest extends Specification {
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ReservationService {
 
-    List<ReservationResponseDto> getAllReservationByStaff(long id);
+    List<ReservationResponseDto> getReservationsStaffId(long id);
 
     Reservation updateStatus(ReservationStatusUpdateDto reservationStatusUpdateDto);
 

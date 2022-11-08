@@ -4,10 +4,7 @@ package com.bjit.salon.reservation.service.dto.request;
 import com.bjit.salon.reservation.service.entity.PaymentMethod;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.Instant;
 import java.util.List;
 
@@ -18,11 +15,11 @@ import java.util.List;
 @Getter
 @ToString
 public class ReservationCreateDto {
-    // todo: Make sure, OL will not support
-    @NotNull(message = "consumer id can't be null")
+    @NotNull(message = "staff id can't be null")
+    @Min(value = 1, message = "staff id can't equal or less than 0")
     private long staffId;
     @NotNull(message = "consumer id can't be null")
-    // todo: Make sure, OL will not support
+    @Min(value = 1, message = "consumer id can't equal or less than 0'")
     private long consumerId;
     @NotNull(message = "reservation time can't be null")
     private Instant reservationStartAt;

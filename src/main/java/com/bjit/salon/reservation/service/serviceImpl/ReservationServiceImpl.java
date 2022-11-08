@@ -36,7 +36,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationProducer reservationProducer;
 
     @Override
-    public List<ReservationResponseDto> getAllReservationByStaff(long id) {
+    public List<ReservationResponseDto> getReservationsStaffId(long id) {
         return reservationMapper.reservationsToReservationResponses(reservationRepository.findAllByStaffId(id));
     }
 
@@ -106,8 +106,6 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private Reservation cancelReservation(Reservation reservation) {
-        // todo: checking ReservationStatus: CANCELLED
-        // todo: Change class name: ReservationStatus to ReservationStatus
         if (reservation.getReservationStatus() != ReservationStatus.CANCELLED
                 && reservation.getReservationStatus() == ReservationStatus.INITIATED) {
             reservation.setReservationStatus(ReservationStatus.CANCELLED);
