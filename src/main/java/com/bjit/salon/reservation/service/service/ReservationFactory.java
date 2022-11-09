@@ -2,30 +2,36 @@ package com.bjit.salon.reservation.service.service;
 
 import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.entity.ReservationStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-
+@Service
 public class ReservationFactory {
 
-    private final Reservation reservation;
-    private final ReservationStatus status;
+    private Reservation reservation;
 
-    public ReservationFactory(Reservation reservation, ReservationStatus status) {
-        this.reservation = reservation;
-        this.status = status;
-    }
+    @Autowired
+    private CancelledReservation cancelReservation;
+    @Autowired
+    private AllocatedReservation allocateReservation;
+    @Autowired
+    private ProcessedReservation processReservation;
+    @Autowired
+    private CompletedReservation completeReservation;
 
-    public Reservation updateReservationStatus(){
-        Reservation updatedReservation = new Reservation();
+    public Reservation updateReservationStatus(Reservation rs, ReservationStatus status ){
+        this.reservation = rs;
         if(status == ReservationStatus.CANCELLED){
-            updatedReservation = updateReservation(new CancelledReservation());
+            return updateReservation(cancelReservation);
         }else if(status == ReservationStatus.ALLOCATED){
-            updatedReservation = updateReservation(new AllocatedReservation());
+            return updateReservation(allocateReservation);
         }else if(status == ReservationStatus.PROCESSING){
-            updatedReservation = updateReservation(new ProcessedReservation());
+           return updateReservation(processReservation);
         }else if(status == ReservationStatus.COMPLETED){
-            updatedReservation = updateReservation(new CompletedReservation());
+           return updateReservation(completeReservation);
         }
-        return updatedReservation;
+        return null;
     }
 
     public Reservation updateReservation(ReservationManager manager) {

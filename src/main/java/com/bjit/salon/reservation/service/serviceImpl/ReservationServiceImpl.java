@@ -35,6 +35,8 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationMapper reservationMapper;
     private final ReservationProducer reservationProducer;
 
+    private final ReservationFactory reservationFactory;
+
     @Override
     public List<ReservationResponseDto> getReservationsStaffId(long id) {
         return reservationMapper.reservationsToReservationResponses(reservationRepository.findAllByStaffId(id));
@@ -48,8 +50,7 @@ public class ReservationServiceImpl implements ReservationService {
         }
         // todo: Think of implementing any design pattern -  Strategy Design Pattern
         Reservation updatedReservation;
-        ReservationFactory factory = new ReservationFactory(currentReservation.get(), reservationStatusUpdateDto.getStatus());
-        updatedReservation = factory.updateReservationStatus();
+        updatedReservation = reservationFactory.updateReservationStatus(currentReservation.get(), reservationStatusUpdateDto.getStatus());
         //publishActivity(updatedReservation);
         return updatedReservation;
     }
