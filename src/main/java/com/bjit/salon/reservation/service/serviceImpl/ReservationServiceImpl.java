@@ -13,9 +13,7 @@ import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException
 import com.bjit.salon.reservation.service.mapper.ReservationMapper;
 import com.bjit.salon.reservation.service.producer.ReservationProducer;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
-import com.bjit.salon.reservation.service.service.ReservationFactory;
-import com.bjit.salon.reservation.service.service.ReservationManager;
-import com.bjit.salon.reservation.service.service.ReservationService;
+import com.bjit.salon.reservation.service.service.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,26 +46,11 @@ public class ReservationServiceImpl implements ReservationService {
         if (currentReservation.isEmpty()) {
             throw new ReservationNotFoundException("Reservation id is not found: " + reservationStatusUpdateDto.getReservationId());
         }
-        // todo: Think of implementing any design pattern
-        Reservation updatedReservation = new Reservation();
-        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.CANCELLED) {
-            updatedReservation = cancelReservation(currentReservation.get());
-        }
-
-        updatedReservation = new ReservationFactory()
-                .reserve(reservationStatusUpdateDto.getStatus(), currentReservation.get());
-
-        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.ALLOCATED) {
-            updatedReservation = allocateReservation(currentReservation.get());
-        }
-        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.PROCESSING) {
-            updatedReservation = processReservation(currentReservation.get());
-        }
-        if (reservationStatusUpdateDto.getStatus() == ReservationStatus.COMPLETED) {
-            updatedReservation = completeReservation(currentReservation.get());
-        }
-
-        publishActivity(updatedReservation);
+        // todo: Think of implementing any design pattern -  Strategy Design Pattern
+        Reservation updatedReservation;
+        ReservationFactory factory = new ReservationFactory(currentReservation.get(), reservationStatusUpdateDto.getStatus());
+        updatedReservation = factory.updateReservationStatus();
+        //publishActivity(updatedReservation);
         return updatedReservation;
     }
 
