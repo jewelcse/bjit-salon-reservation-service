@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.serviceImpl;
 
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto;
+import com.bjit.salon.reservation.service.dto.producer.UpdateStatusProducer;
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest;
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
 import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateDto;
@@ -43,78 +43,6 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public Reservation updateStatus(ReservationStatusUpdateDto reservationStatusUpdateDto) {
-        Optional<Reservation> currentReservation = reservationRepository.findById(reservationStatusUpdateDto.getReservationId());
-        if (currentReservation.isEmpty()) {
-            throw new ReservationNotFoundException("Reservation id is not found: " + reservationStatusUpdateDto.getReservationId());
-        }
-        // todo: Think of implementing any design pattern -  Strategy Design Pattern
-        Reservation updatedReservation;
-        updatedReservation = reservationFactory.updateReservationStatus(currentReservation.get(), reservationStatusUpdateDto.getStatus());
-        //publishActivity(updatedReservation);
-        return updatedReservation;
-    }
-
-    private StaffActivityDto publishActivity(Reservation reservation) {
-        StaffActivityDto newActivityAndUpdateStatus = StaffActivityDto
-                .builder()
-                .staffId(reservation.getStaffId())
-                .consumerId(reservation.getConsumerId())
-                .reservationId(reservation.getId())
-                .reservationStartAt(reservation.getReservationStartAt())
-                .reservationEndAt(reservation.getReservationEndAt())
-                .reservationStatus(reservation.getReservationStatus())
-                .build();
-        return reservationProducer.updateActivity(newActivityAndUpdateStatus);
-    }
-
-    private Reservation completeReservation(Reservation reservation) {
-        return isNotCancelled(reservation.getReservationStatus())
-                && reservation.getReservationStatus() == ReservationStatus.PROCESSING
-                ? updateStatusAndSave(ReservationStatus.COMPLETED, reservation)
-                : reservation;
-    }
-
-    private Reservation processReservation(Reservation reservation) {
-        if (isNotCancelled(reservation.getReservationStatus())
-                && reservation.getReservationStatus() == ReservationStatus.ALLOCATED) {
-            updateStatusAndSave(ReservationStatus.PROCESSING, reservation);
-        }
-        return reservation;
-    }
-
-    private Reservation allocateReservation(Reservation reservation) {
-        if (isNotCancelled(reservation.getReservationStatus())
-                && reservation.getReservationStatus() == ReservationStatus.INITIATED) {
-            updateStatusAndSave(ReservationStatus.ALLOCATED, reservation);
-        }
-        return reservation;
-    }
-
-    private Reservation cancelReservation(Reservation reservation) {
-        if (isNotCancelled(reservation.getReservationStatus()) && reservation.getReservationStatus() == ReservationStatus.INITIATED) {
-            updateStatusAndSave(ReservationStatus.CANCELLED, reservation);
-        }
-        return reservation;
-        //todo: give separate message for: ALLOCATE, PROCESSING, COMPLETED, CANCELLED
-    }
-
-
-    private boolean isNotCancelled(ReservationStatus status) {
-        return status != ReservationStatus.CANCELLED;
-    }
-
-    private Reservation updateStatusAndSave(ReservationStatus status, Reservation reservation) {
-        reservation.setReservationStatus(status);
-        return reservationRepository.save(reservation);
-    }
-    // todo: debug the issue
-//    private boolean isNotReservable(ReservationStatus status) {
-//        return status != ReservationStatus.ALLOCATED || status != ReservationStatus.PROCESSING || status != ReservationStatus.COMPLETED;
-//    }
-
-
-    @Override
     public ReservationResponseDto save(ReservationCreateDto reservationCreateDto) {
 
         int totalApproximatedTime = getApproximateTotalTimeInMinutes(reservationCreateDto.getServices());
@@ -135,6 +63,37 @@ public class ReservationServiceImpl implements ReservationService {
                 .build();
 
         return reservationMapper.toReservationResponse(reservationRepository.save(newReservation));
+    }
+
+    @Override
+    public Reservation updateStatus(ReservationStatusUpdateDto updateDto) {
+        // todo: Think of implementing any design pattern -  Strategy Design Pattern
+        Reservation updatedReservation;
+        updatedReservation = reservationFactory.updateReservationStatus(getReservationById(updateDto.getReservationId()),
+                updateDto.getStatus());
+        //publishStatus(updatedReservation);
+        return updatedReservation;
+    }
+
+    private UpdateStatusProducer publishStatus(Reservation reservation) {
+        UpdateStatusProducer updateActivity = UpdateStatusProducer
+                .builder()
+                .staffId(reservation.getStaffId())
+                .consumerId(reservation.getConsumerId())
+                .reservationId(reservation.getId())
+                .reservationStartAt(reservation.getReservationStartAt())
+                .reservationEndAt(reservation.getReservationEndAt())
+                .reservationStatus(reservation.getReservationStatus())
+                .build();
+        return reservationProducer.updateStatus(updateActivity);
+    }
+
+    private Reservation getReservationById(long id) {
+        Optional<Reservation> currentReservation = reservationRepository.findById(id);
+        if (currentReservation.isEmpty()) {
+            throw new ReservationNotFoundException("Reservation id is not found: " + id);
+        }
+        return currentReservation.get();
     }
 
     private boolean isReserved(Instant startTime, Instant endTime) {

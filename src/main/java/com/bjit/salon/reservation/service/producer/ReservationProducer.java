@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.producer;
 
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto;
+import com.bjit.salon.reservation.service.dto.producer.UpdateStatusProducer;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +18,15 @@ import static com.bjit.salon.reservation.service.util.Utils.STAFF_NEW_ACTIVITY_T
 public class ReservationProducer {
     private final static Logger log = LoggerFactory.getLogger(ReservationProducer.class);
 
-    private final KafkaTemplate<String, StaffActivityDto> kafkaTemplate;
+    private final KafkaTemplate<String, UpdateStatusProducer> template;
 
-    public StaffActivityDto updateActivity(StaffActivityDto staffActivity){
-        Message<StaffActivityDto> message = MessageBuilder
-                .withPayload(staffActivity)
+    public UpdateStatusProducer updateStatus(UpdateStatusProducer producer){
+        Message<UpdateStatusProducer> message = MessageBuilder
+                .withPayload(producer)
                 .setHeader(KafkaHeaders.TOPIC,STAFF_NEW_ACTIVITY_TOPIC)
                 .build();
-        kafkaTemplate.send(message);
-        log.info("producer: "+staffActivity);
-        return staffActivity;
+        template.send(message);
+        log.info("Published the Status Update Event: "+producer);
+        return producer;
     }
 }

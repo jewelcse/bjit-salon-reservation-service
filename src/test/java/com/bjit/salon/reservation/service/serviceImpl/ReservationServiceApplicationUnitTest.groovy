@@ -1,6 +1,6 @@
 package com.bjit.salon.reservation.service.serviceImpl
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto
+import com.bjit.salon.reservation.service.dto.producer.UpdateStatusProducer
 import com.bjit.salon.reservation.service.dto.request.CatalogRequest
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto
 import com.bjit.salon.reservation.service.dto.request.ReservationStatusUpdateDto
@@ -522,7 +522,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .totalPayableAmount(100.00)
                 .build()
 
-        def updateResponse = StaffActivityDto.builder()
+        def updateResponse = UpdateStatusProducer.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)
@@ -633,7 +633,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .totalPayableAmount(100.00)
                 .build()
 
-        def updateResponse = StaffActivityDto.builder()
+        def updateResponse = UpdateStatusProducer.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)
@@ -711,7 +711,7 @@ class ReservationServiceApplicationUnitTest extends Specification {
                 .totalPayableAmount(100.00)
                 .build()
 
-        def updateResponse = StaffActivityDto.builder()
+        def updateResponse = UpdateStatusProducer.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)

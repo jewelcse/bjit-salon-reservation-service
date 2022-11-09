@@ -12,7 +12,7 @@ import java.time.Instant;
 @Getter
 @ToString
 @Builder
-public class StaffActivityDto implements Serializable {
+public class UpdateStatusProducer implements Serializable {
     private static final long serialVersionUID = 9178661439383356177L;
     private Long staffId;
     private Long consumerId;

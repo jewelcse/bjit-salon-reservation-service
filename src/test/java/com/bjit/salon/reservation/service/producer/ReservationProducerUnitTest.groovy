@@ -1,6 +1,6 @@
 package com.bjit.salon.reservation.service.producer
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityDto
+import com.bjit.salon.reservation.service.dto.producer.UpdateStatusProducer
 import com.bjit.salon.reservation.service.entity.ReservationStatus
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.core.KafkaTemplate
@@ -11,7 +11,7 @@ import spock.lang.Specification
 @SpringBootTest
 class ReservationProducerUnitTest extends Specification {
 
-    private KafkaTemplate<String, StaffActivityDto> kafkaTemplate;
+    private KafkaTemplate<String, UpdateStatusProducer> kafkaTemplate;
     private ReservationProducer producer;
 
     def setup(){
@@ -21,7 +21,7 @@ class ReservationProducerUnitTest extends Specification {
 
     def "should update and create the staff new activity"() {
         given:
-        def updateRequest = StaffActivityDto.builder()
+        def updateRequest = UpdateStatusProducer.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)

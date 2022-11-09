@@ -1,9 +1,13 @@
-package com.bjit.salon.reservation.service.service;
+package com.bjit.salon.reservation.service.serviceImpl;
 
 import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.entity.ReservationStatus;
+import com.bjit.salon.reservation.service.service.ReservationManager;
+import com.bjit.salon.reservation.service.serviceImpl.AllocatedReservation;
+import com.bjit.salon.reservation.service.serviceImpl.CancelledReservation;
+import com.bjit.salon.reservation.service.serviceImpl.CompletedReservation;
+import com.bjit.salon.reservation.service.serviceImpl.ProcessedReservation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +38,7 @@ public class ReservationFactory {
         return null;
     }
 
-    public Reservation updateReservation(ReservationManager manager) {
+    private Reservation updateReservation(ReservationManager manager) {
         return manager.update(reservation);
     }
 }
