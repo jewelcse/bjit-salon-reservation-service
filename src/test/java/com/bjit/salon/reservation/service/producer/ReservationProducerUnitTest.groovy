@@ -1,22 +1,17 @@
 package com.bjit.salon.reservation.service.producer
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateAndUpdateDto
-import com.bjit.salon.reservation.service.entity.EWorkingStatus
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.mockito.Mock
-import org.springframework.beans.factory.annotation.Autowired
+import com.bjit.salon.reservation.service.dto.producer.UpdateStatusProducer
+import com.bjit.salon.reservation.service.entity.ReservationStatus
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.support.MessageBuilder
 import spock.lang.Specification
 
-import static com.bjit.salon.reservation.service.util.ConstraintsUtil.STAFF_NEW_ACTIVITY_TOPIC
-
 @SpringBootTest
 class ReservationProducerUnitTest extends Specification {
 
-    private KafkaTemplate<String, StaffActivityCreateAndUpdateDto> kafkaTemplate;
+    private KafkaTemplate<String, UpdateStatusProducer> kafkaTemplate;
     private ReservationProducer producer;
 
     def setup(){
@@ -26,11 +21,11 @@ class ReservationProducerUnitTest extends Specification {
 
     def "should update and create the staff new activity"() {
         given:
-        def updateRequest = StaffActivityCreateAndUpdateDto.builder()
+        def updateRequest = UpdateStatusProducer.builder()
                 .staffId(1L)
                 .reservationId(1L)
                 .workingDate(null)
-                .workingStatus(EWorkingStatus.ALLOCATED)
+                .workingStatus(ReservationStatus.ALLOCATED)
                 .startTime(null)
                 .endTime(null)
                 .consumerId(1L)
@@ -48,7 +43,7 @@ class ReservationProducerUnitTest extends Specification {
 
         then:
         response.getConsumerId() == 1
-        response.getWorkingStatus() ==EWorkingStatus.ALLOCATED
+        response.getReservationStatus() ==ReservationStatus.ALLOCATED
     }
 
 

@@ -1,11 +1,10 @@
 package com.bjit.salon.reservation.service.entity;
 
-public enum EWorkingStatus {
+public enum ReservationStatus {
     INITIATED,
     PROCESSING,
     RUNNING,
     CANCELLED,
-    ACCEPTED,
     ALLOCATED,
     TERMINATED,
     COMPLETED

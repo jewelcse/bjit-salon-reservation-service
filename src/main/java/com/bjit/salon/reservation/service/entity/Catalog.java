@@ -23,7 +23,7 @@ public class Catalog {
     @Column(name = "description")
     private String description;
     @Column(name = "approximate_time_for_completion")
-    private int approximateTimeForCompletion; // IN MINUTES
+    private int approximateCompletionTime; // IN MINUTES
     @Column(name = "payable_amount")
     private double payableAmount;
 }

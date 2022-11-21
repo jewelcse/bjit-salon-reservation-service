@@ -1,13 +1,11 @@
 package com.bjit.salon.reservation.service.dto.request;
 
 
-import com.bjit.salon.reservation.service.entity.EPaymentMethod;
+import com.bjit.salon.reservation.service.entity.PaymentMethod;
 import lombok.*;
 
-import java.sql.Timestamp;
+import javax.validation.constraints.*;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -17,15 +15,16 @@ import java.util.List;
 @Getter
 @ToString
 public class ReservationCreateDto {
-
-    private long staffId;   // staff id
-    private long consumerId; // user id
-    private LocalDate reservationDate;
-    private LocalTime startTime;
-
-    private LocalTime endTime;// will be calculated dynamically
-
-    private double totalPayableAmount; // will be calculated dynamically
-    private EPaymentMethod paymentMethod; // payment method
+    @NotNull(message = "staff id can't be null")
+    @Min(value = 1, message = "staff id can't equal or less than 0")
+    private long staffId;
+    @NotNull(message = "consumer id can't be null")
+    @Min(value = 1, message = "consumer id can't equal or less than 0'")
+    private long consumerId;
+    @NotNull(message = "reservation time can't be null")
+    private Instant reservationStartAt;
+    @NotNull(message = "payment method can't be null")
+    private PaymentMethod paymentMethod;
+    @NotEmpty(message = "services can't be null")
     private List<CatalogRequest> services;
 }
